@@ -1,6 +1,6 @@
 # Kaspa Sovereign Architect Engine
 
-Production-grade Codex skill for deep Kaspa protocol engineering, wallet/backend architecture, DeFi system design, and reliability-first delivery.
+Production-grade AI skill for deep Kaspa protocol engineering, wallet/backend architecture, DeFi system design, and reliability-first delivery.
 
 ## What This Is
 
@@ -10,7 +10,7 @@ This repo ships a reusable AI skill package:
 - Skill source: `skills/public/kaspa-sovereign-architect-engine/`
 - Distribution model: GitHub Releases (zip asset)
 
-It is not a website product. It is an installable skill for Codex workflows.
+It is not a website product. It is an installable skill package with adapters for multiple AI environments.
 
 ## What I Am
 
@@ -37,6 +37,15 @@ Or embed it in a direct task:
 Use $kaspa-sovereign-architect-engine to audit my wallet backend for replay, nonce, and signing risks.
 ```
 
+## Compatibility
+
+- Codex native skill: `SKILL.md`
+- OpenAI-compatible metadata: `agents/openai.yaml`
+- Claude/Anthropic adapter: `agents/anthropic.md`
+- Cursor rules adapter: `agents/cursor.mdc`
+- Generic LLM adapter: `agents/generic-system-prompt.md`
+- Compatibility manifest: `manifest.json`
+
 ## Install The Skill
 
 ### Option A: Install from latest release package
@@ -54,6 +63,32 @@ unzip -o /tmp/kaspa-sovereign-architect-engine.zip -d "$CODEX_HOME/skills"
 mkdir -p "$CODEX_HOME/skills/public"
 cp -R skills/public/kaspa-sovereign-architect-engine "$CODEX_HOME/skills/public/"
 ```
+
+### Option C: One-command install scripts
+
+macOS/Linux:
+
+```bash
+./skills/public/kaspa-sovereign-architect-engine/scripts/install-codex.sh
+```
+
+Windows PowerShell:
+
+```powershell
+.\skills\public\kaspa-sovereign-architect-engine\scripts\install-codex.ps1
+```
+
+Export non-Codex adapter pack:
+
+```bash
+./skills/public/kaspa-sovereign-architect-engine/scripts/export-adapters.sh
+```
+
+## Using It Outside Codex
+
+1. Pick an adapter file from `skills/public/kaspa-sovereign-architect-engine/agents/`.
+2. Copy its content into your platform's system/developer instruction field.
+3. Add your task prompt (for example: "Design a Kaspa DAG-aware indexer for 100k users with failure recovery").
 
 ## Releases
 

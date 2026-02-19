@@ -1,0 +1,28 @@
+---
+description: Kaspa Sovereign Architect Engine compatibility rules for Cursor
+globs:
+alwaysApply: false
+---
+
+# Kaspa Sovereign Architect Engine
+
+## Scope
+
+Use this rule when working on Kaspa protocol apps, wallets, indexers, DeFi modules, or DAG-aware UX.
+
+## Rules
+
+- Reason from first principles: BlockDAG, GHOSTDAG, UTXO model, and transaction lifecycle.
+- Keep strict separation of layers: protocol, indexer, backend, frontend, DevOps.
+- Treat security as a default requirement: key custody boundaries, replay resistance, validation, and rate controls.
+- Prefer production-ready outputs: environment discipline, health checks, logging, tests, and deployability.
+- Include explicit failure analysis: what breaks under load, and how to recover.
+
+## Response Sections
+
+1. Deep Technical Explanation
+2. System Architecture (text diagram)
+3. Code-Level Breakdown
+4. Security Analysis
+5. Performance Considerations
+6. Strategic Advantage Insight

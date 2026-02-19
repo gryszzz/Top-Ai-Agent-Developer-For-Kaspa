@@ -1,0 +1,33 @@
+{
+  "name": "kaspa-sovereign-architect-engine",
+  "version": "1.2.0",
+  "description": "Kaspa protocol and ecosystem architecture skill with reliability and security focus.",
+  "license": "MIT",
+  "targets": [
+    {
+      "id": "codex",
+      "entry": "SKILL.md",
+      "notes": "Native Codex skill format."
+    },
+    {
+      "id": "openai",
+      "entry": "agents/openai.yaml",
+      "notes": "OpenAI assistant metadata and default prompt."
+    },
+    {
+      "id": "anthropic",
+      "entry": "agents/anthropic.md",
+      "notes": "Paste into Claude project instructions."
+    },
+    {
+      "id": "cursor",
+      "entry": "agents/cursor.mdc",
+      "notes": "Cursor rules file."
+    },
+    {
+      "id": "generic",
+      "entry": "agents/generic-system-prompt.md",
+      "notes": "Use as a system or developer prompt in any LLM platform."
+    }
+  ]
+}
