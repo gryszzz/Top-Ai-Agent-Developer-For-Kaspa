@@ -28,13 +28,13 @@ Use $kaspa-sovereign-architect-engine to audit my Kaspa wallet backend for repla
 - Dynamic validation: unit/integration/stress/chaos checks and recovery planning.
 - Iteration loop: reflection, comparative optimization, and next-step experiment rules.
 
-## GitHub Pages Docs
+## Distribution
 
-A static docs site is included under `docs/` and deployed with GitHub Actions.
+This project is distributed as a versioned GitHub Release asset (zip), not as a website.
 
-Expected URL (after Pages is enabled):
+Latest releases:
 
-- [https://gryszzz.github.io/Top-Ai-Agent-Developer-For-Kaspa/](https://gryszzz.github.io/Top-Ai-Agent-Developer-For-Kaspa/)
+- [https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
 
 ## Repo Highlights
 
@@ -43,7 +43,7 @@ Expected URL (after Pages is enabled):
 - `kaspa-balance-api/` – production-oriented Kaspa balance API example
 - `kaspa-codex-evolution-loop/` – autonomous iteration and simulation framework
 
-## Local Preview For Docs
+## Local Docs Preview (Optional)
 
 ```bash
 python3 -m http.server 8000 -d docs
