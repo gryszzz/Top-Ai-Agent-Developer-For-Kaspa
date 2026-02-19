@@ -3,6 +3,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import { verify } from "@noble/secp256k1";
 import { z } from "zod";
+import { trackBusinessEvent } from "../analytics/events";
 import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
 import { HttpError } from "../middleware/errorHandler";
@@ -79,6 +80,10 @@ export function createWalletRouter(): Router {
         message
       });
 
+      trackBusinessEvent("signup_started", input.walletType, {
+        network: env.KASPA_NETWORK
+      });
+
       res.status(201).json({
         nonce,
         message,
@@ -141,6 +146,11 @@ export function createWalletRouter(): Router {
         walletType: challenge.walletType,
         verificationMode,
         expiresInSeconds
+      });
+
+      trackBusinessEvent("activation_completed", challenge.walletType, {
+        verificationMode,
+        network: env.KASPA_NETWORK
       });
     } catch (error) {
       next(error);

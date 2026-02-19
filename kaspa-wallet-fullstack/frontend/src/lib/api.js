@@ -85,3 +85,9 @@ export function createWalletSession(payload) {
         body: JSON.stringify(payload)
     });
 }
+export function createPaymentQuote(payload) {
+    return jsonRequest("/v1/payments/quote", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}

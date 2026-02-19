@@ -11,6 +11,7 @@ import { attachRateLimiter } from "./middleware/rateLimiter";
 import { createBalanceRouter } from "./routes/balance";
 import { createHealthRouter } from "./routes/health";
 import { createNetworkRouter } from "./routes/network";
+import { createPaymentsRouter } from "./routes/payments";
 import { createWalletRouter } from "./routes/wallet";
 
 export function createApp(kaspaClient: KaspaRpcClient) {
@@ -48,6 +49,7 @@ export function createApp(kaspaClient: KaspaRpcClient) {
   app.use("/v1/balance", createBalanceRouter(kaspaClient));
   app.use("/v1", createNetworkRouter());
   app.use("/v1/wallet", createWalletRouter());
+  app.use("/v1/payments", createPaymentsRouter());
 
   app.get("/metrics", async (_req, res, next) => {
     try {
@@ -61,7 +63,7 @@ export function createApp(kaspaClient: KaspaRpcClient) {
   app.get("/", (_req, res) => {
     res.status(200).json({
       service: "kaspa-wallet-backend",
-      version: "1.2.0",
+      version: "1.3.0",
       endpoints: [
         "GET /healthz",
         "GET /readyz",
@@ -69,6 +71,7 @@ export function createApp(kaspaClient: KaspaRpcClient) {
         "GET /v1/balance/:address",
         "POST /v1/wallet/challenge",
         "POST /v1/wallet/session",
+        "POST /v1/payments/quote",
         "GET /metrics"
       ]
     });

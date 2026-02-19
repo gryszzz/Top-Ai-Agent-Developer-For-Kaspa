@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  createPaymentQuote,
   createWalletChallenge,
   createWalletSession,
   fetchBalance,
   fetchNetwork,
-  type NetworkResponse
+  type NetworkResponse,
+  type PaymentQuoteResponse
 } from "./lib/api";
 import {
-  buildKaspaUri,
   connectKasware,
   hasKaswareProvider,
-  signKaswareMessage,
-  type WalletType
+  signKaswareMessage
 } from "./lib/walletAdapters";
 import { useWalletStore } from "./state/walletStore";
 
@@ -41,17 +41,26 @@ export default function App() {
   const [networkInfo, setNetworkInfo] = useState<NetworkResponse | null>(null);
   const [manualAddress, setManualAddress] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("1.0");
+  const [paymentDestination, setPaymentDestination] = useState("");
+  const [paymentNote, setPaymentNote] = useState("Kaspa wallet transfer");
+  const [paymentQuote, setPaymentQuote] = useState<PaymentQuoteResponse | null>(null);
 
   useEffect(() => {
     fetchNetwork().then(setNetworkInfo).catch((err: Error) => setError(err.message));
   }, [setError]);
 
-  const kaspiumUri = useMemo(() => {
-    if (!address) {
-      return "";
+  const feeConfigSummary = useMemo(() => {
+    if (!networkInfo) {
+      return "pricing unavailable";
     }
-    return buildKaspaUri(address, paymentAmount || undefined, "Kaspium Testnet Payment");
-  }, [address, paymentAmount]);
+
+    const m = networkInfo.monetization;
+    if (!m.platformFeeEnabled) {
+      return "platform fee disabled";
+    }
+
+    return `${m.platformFeeBps} bps (min ${m.platformFeeMinKas} KAS)`;
+  }, [networkInfo]);
 
   async function handleKaswareConnect() {
     try {
@@ -113,6 +122,29 @@ export default function App() {
       setBalance(latestBalance.balanceKas);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Balance fetch failed");
+    }
+  }
+
+  async function handleCreatePaymentQuote() {
+    try {
+      if (!address) {
+        throw new Error("Connect a wallet before creating a payment intent");
+      }
+      if (!isLikelyKaspaAddress(paymentDestination)) {
+        throw new Error("Enter a valid destination address");
+      }
+
+      const quote = await createPaymentQuote({
+        fromAddress: address,
+        toAddress: paymentDestination,
+        amountKas: paymentAmount,
+        walletType,
+        note: paymentNote
+      });
+
+      setPaymentQuote(quote);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Payment quote failed");
     }
   }
 
@@ -225,26 +257,91 @@ export default function App() {
       </section>
 
       <section className="mt-5 rounded-2xl border border-slate-700 bg-slate-900/70 p-5">
-        <h2 className="text-lg font-medium">Kaspium Deeplink</h2>
+        <h2 className="text-lg font-medium">Payment Intent + Fee Breakdown</h2>
         <p className="mt-2 text-sm text-slate-300">
-          Use this URI for mobile handoff. Works best when your connected address is a testnet account.
+          Transparent monetization mode. The platform fee configuration is published by backend network metadata.
         </p>
-        <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label className="text-sm">
+        <div className="mt-2 rounded bg-slate-800 p-2 text-xs text-slate-300">current pricing: {feeConfigSummary}</div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <label className="text-sm text-slate-300">
+            destination address
+            <input
+              value={paymentDestination}
+              onChange={(e) => setPaymentDestination(e.target.value)}
+              placeholder={`${TESTNET_PREFIX}...`}
+              className="mt-1 w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="text-sm text-slate-300">
             amount (KAS)
             <input
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(e.target.value)}
-              className="ml-2 rounded border border-slate-600 bg-slate-800 px-2 py-1"
+              className="mt-1 w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm"
             />
           </label>
-          {kaspiumUri ? (
-            <a href={kaspiumUri} className="rounded bg-kaspa-mint px-3 py-2 text-sm font-medium text-black">
-              Open in wallet
-            </a>
-          ) : null}
+          <label className="text-sm text-slate-300 md:col-span-2">
+            note (optional)
+            <input
+              value={paymentNote}
+              onChange={(e) => setPaymentNote(e.target.value)}
+              className="mt-1 w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm"
+            />
+          </label>
         </div>
-        <p className="mt-3 break-all rounded bg-slate-800 p-2 text-xs text-slate-300">{kaspiumUri || "connect wallet to generate"}</p>
+
+        <button
+          type="button"
+          onClick={handleCreatePaymentQuote}
+          className="mt-4 rounded bg-kaspa-mint px-4 py-2 text-sm font-medium text-black"
+        >
+          Create payment quote
+        </button>
+
+        {paymentQuote ? (
+          <div className="mt-4 rounded border border-slate-700 bg-slate-800/70 p-4 text-sm">
+            <p className="text-slate-300">{paymentQuote.pricing.disclosure}</p>
+            <dl className="mt-3 grid gap-2 md:grid-cols-2">
+              <div>
+                <dt className="text-slate-400">recipient amount</dt>
+                <dd>{paymentQuote.pricing.platformFee.amountKas} KAS</dd>
+              </div>
+              <div>
+                <dt className="text-slate-400">platform fee</dt>
+                <dd>{paymentQuote.pricing.platformFee.feeKas} KAS</dd>
+              </div>
+              <div>
+                <dt className="text-slate-400">total debit</dt>
+                <dd>{paymentQuote.pricing.platformFee.totalDebitKas} KAS</dd>
+              </div>
+              <div>
+                <dt className="text-slate-400">platform wallet</dt>
+                <dd className="break-all">{paymentQuote.pricing.platformFee.recipientAddress}</dd>
+              </div>
+            </dl>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={paymentQuote.paymentIntents.primary.uri}
+                className="rounded bg-kaspa-mint px-3 py-2 text-xs font-semibold text-black"
+              >
+                Open recipient payment URI
+              </a>
+              {paymentQuote.paymentIntents.platformFee ? (
+                <a
+                  href={paymentQuote.paymentIntents.platformFee.uri}
+                  className="rounded bg-slate-700 px-3 py-2 text-xs"
+                >
+                  Open platform fee URI
+                </a>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <p className="mt-3 rounded bg-slate-800 p-2 text-xs text-slate-300">
+            Generate a quote to preview destination amount, platform fee, and deeplink intents.
+          </p>
+        )}
       </section>
     </main>
   );

@@ -1,6 +1,7 @@
 import path from "node:path";
 import dotenv from "dotenv";
 import { z } from "zod";
+import { validateKaspaAddress } from "../kaspa/address";
 
 dotenv.config();
 
@@ -16,6 +17,18 @@ const boolFromEnv = z
 
     return truthy.has(value.toLowerCase());
   });
+
+const boolFromEnvDefault = (fallback: boolean) =>
+  z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) {
+        return fallback;
+      }
+
+      return truthy.has(value.toLowerCase());
+    });
 
 const intFromEnv = (fallback: number) =>
   z
@@ -47,7 +60,7 @@ const EnvSchema = z.object({
   KASPA_RPC_TIMEOUT_MS: intFromEnv(5_000).pipe(z.number().int().min(500).max(60_000)),
   KASPA_RPC_USE_TLS: boolFromEnv,
   KASPA_RPC_CA_CERT_PATH: z.string().optional(),
-  KASPA_ALLOWED_ADDRESS_PREFIXES: z.string().default("kaspatest"),
+  KASPA_ALLOWED_ADDRESS_PREFIXES: z.string().default("kaspatest,kaspa"),
   KASPA_NETWORK: z.string().default("testnet-10"),
 
   HEALTHCHECK_INCLUDE_NODE: boolFromEnv,
@@ -56,7 +69,14 @@ const EnvSchema = z.object({
   SESSION_TTL_SECONDS: intFromEnv(3600).pipe(z.number().int().min(60).max(86400 * 30)),
   CHALLENGE_TTL_SECONDS: intFromEnv(300).pipe(z.number().int().min(30).max(3600)),
   ALLOW_UNVERIFIED_WALLET_SIG: boolFromEnv,
-  KASPIUM_URI_SCHEME: z.string().default("kaspa")
+  KASPIUM_URI_SCHEME: z.string().default("kaspa"),
+
+  PLATFORM_FEE_ENABLED: boolFromEnvDefault(true),
+  PLATFORM_FEE_BPS: intFromEnv(100).pipe(z.number().int().min(0).max(10_000)),
+  PLATFORM_FEE_MIN_KAS: z.string().default("0.01"),
+  PLATFORM_FEE_RECIPIENT: z
+    .string()
+    .default("kaspa:qpv7fcvdlz6th4hqjtm9qkkms2dw0raem963x3hm8glu3kjgj7922vy69hv85")
 });
 
 const parsed = EnvSchema.safeParse(process.env);
@@ -78,5 +98,16 @@ export const env = {
     ? path.resolve(envValues.KASPA_RPC_CA_CERT_PATH)
     : undefined
 };
+
+const feeRecipientValidation = validateKaspaAddress(
+  env.PLATFORM_FEE_RECIPIENT,
+  env.KASPA_ALLOWED_ADDRESS_PREFIXES
+);
+
+if (!feeRecipientValidation.valid) {
+  // eslint-disable-next-line no-console
+  console.error("Invalid PLATFORM_FEE_RECIPIENT", feeRecipientValidation.reason);
+  process.exit(1);
+}
 
 export type Env = typeof env;

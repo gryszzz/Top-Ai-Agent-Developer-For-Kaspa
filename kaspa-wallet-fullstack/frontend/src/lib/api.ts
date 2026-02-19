@@ -4,6 +4,12 @@ export type NetworkResponse = {
   network: string;
   rpcTarget: string;
   allowedAddressPrefixes: string[];
+  monetization: {
+    platformFeeEnabled: boolean;
+    platformFeeBps: number;
+    platformFeeMinKas: string;
+    platformFeeRecipient: string;
+  };
   wallets: {
     kasware: { injectedProvider: boolean; methods: string[] };
     kaspium: { injectedProvider: boolean; connectMode: string; uriScheme: string };
@@ -31,6 +37,42 @@ export type WalletSessionResponse = {
   walletType: "kasware" | "kaspium";
   verificationMode: "signature-verified" | "signature-unverified" | "manual";
   expiresInSeconds: number;
+};
+
+export type PaymentQuoteResponse = {
+  network: string;
+  walletType: "kasware" | "kaspium";
+  fromAddress: string;
+  toAddress: string;
+  pricing: {
+    platformFee: {
+      recipientAddress: string;
+      feeBps: number;
+      minFeeKas: string;
+      feeSompi: string;
+      feeKas: string;
+      amountSompi: string;
+      amountKas: string;
+      totalDebitSompi: string;
+      totalDebitKas: string;
+      applied: boolean;
+      enabled: boolean;
+    };
+    disclosure: string;
+  };
+  paymentIntents: {
+    primary: {
+      toAddress: string;
+      amountKas: string;
+      uri: string;
+    };
+    platformFee: {
+      toAddress: string;
+      amountKas: string;
+      uri: string;
+    } | null;
+  };
+  timestamp: string;
 };
 
 async function jsonRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -72,6 +114,19 @@ export function createWalletSession(payload: {
   publicKey?: string;
 }) {
   return jsonRequest<WalletSessionResponse>("/v1/wallet/session", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function createPaymentQuote(payload: {
+  fromAddress: string;
+  toAddress: string;
+  amountKas: string;
+  walletType: "kasware" | "kaspium";
+  note?: string;
+}) {
+  return jsonRequest<PaymentQuoteResponse>("/v1/payments/quote", {
     method: "POST",
     body: JSON.stringify(payload)
   });

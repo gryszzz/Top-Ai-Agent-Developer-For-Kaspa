@@ -10,7 +10,7 @@
     "start": "node dist/server.js",
     "migrate": "node dist/scripts/migrate.js",
     "lint": "tsc --noEmit",
-    "test": "node --test dist/tests/smoke.test.js"
+    "test": "node --test dist/tests/*.test.js"
   },
   "engines": {
     "node": ">=20.12.0"

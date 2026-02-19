@@ -69,7 +69,7 @@ export async function signKaswareMessage(message: string): Promise<string> {
 }
 
 export function buildKaspaUri(address: string, amountKas?: string, note?: string): string {
-  const uri = new URL(`kaspa:${address}`);
+  const uri = new URL(address);
 
   if (amountKas) {
     uri.searchParams.set("amount", amountKas);

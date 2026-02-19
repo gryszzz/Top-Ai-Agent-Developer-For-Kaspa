@@ -115,7 +115,7 @@ export function signKaswareMessage(message) {
     });
 }
 export function buildKaspaUri(address, amountKas, note) {
-    var uri = new URL("kaspa:".concat(address));
+    var uri = new URL(address);
     if (amountKas) {
         uri.searchParams.set("amount", amountKas);
     }

@@ -20,6 +20,12 @@ export function createNetworkRouter(): Router {
           uriScheme: env.KASPIUM_URI_SCHEME
         }
       },
+      monetization: {
+        platformFeeEnabled: env.PLATFORM_FEE_ENABLED,
+        platformFeeBps: env.PLATFORM_FEE_BPS,
+        platformFeeMinKas: env.PLATFORM_FEE_MIN_KAS,
+        platformFeeRecipient: env.PLATFORM_FEE_RECIPIENT
+      },
       timestamp: new Date().toISOString()
     });
   });

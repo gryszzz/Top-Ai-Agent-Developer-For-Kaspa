@@ -1,30 +1,51 @@
-# Kaspa Wallet Fullstack (Testnet-Ready)
+# Kaspa Wallet Fullstack (Revenue-Ready Starter)
 
 Production-style fullstack starter with:
 
-- Node.js/TypeScript backend (`/backend`) for health, balance, network metadata, and wallet session flows
+- Node.js/TypeScript backend (`/backend`) for health, balances, wallet sessions, payment quote monetization, and metrics
 - React 18 + TypeScript + Zustand + Tailwind frontend (`/frontend`)
 - Kasware injected wallet flow (connect + message signing)
 - Kaspium-compatible manual/deeplink mode for mobile wallet handoff
-- Docker Compose for local fullstack boot
+- Docker Compose for one-command local boot
 
-## What is implemented
+## Implemented API
 
 - `GET /healthz`, `GET /readyz`, `GET /metrics`
 - `GET /v1/network`
 - `GET /v1/balance/:address`
 - `POST /v1/wallet/challenge`
 - `POST /v1/wallet/session`
+- `POST /v1/payments/quote` (transparent platform fee + deeplink intents)
 
-## Prerequisites
+## One-command run (clean clone)
 
-- Node 20+
-- npm 10+
-- A reachable Kaspa testnet node with gRPC enabled (and `--utxoindex` for balances)
+```bash
+cp .env.example .env
+docker compose up --build
+```
 
-## Local development
+Frontend: `http://localhost:3000`  
+Backend: `http://localhost:8080`
 
-### Backend
+## Env vars
+
+Core:
+
+- `KASPA_RPC_TARGET` - Kaspa gRPC endpoint (`host:port`)
+- `KASPA_NETWORK` - example: `testnet-10`
+- `KASPA_ALLOWED_ADDRESS_PREFIXES` - defaults to `kaspatest,kaspa`
+- `ALLOW_UNVERIFIED_WALLET_SIG` - set `false` for strict verification
+
+Monetization:
+
+- `PLATFORM_FEE_ENABLED` - `true|false`
+- `PLATFORM_FEE_BPS` - fee in basis points (100 = 1%)
+- `PLATFORM_FEE_MIN_KAS` - minimum fee in KAS
+- `PLATFORM_FEE_RECIPIENT` - fee recipient address
+
+## Local dev (without Docker)
+
+Backend:
 
 ```bash
 cd backend
@@ -34,7 +55,7 @@ npm run build
 npm run dev
 ```
 
-### Frontend
+Frontend:
 
 ```bash
 cd frontend
@@ -43,23 +64,49 @@ npm ci
 npm run dev
 ```
 
-## Docker run
+## Test + typecheck
+
+Backend:
 
 ```bash
-cp .env.example .env
-docker compose up --build
+cd backend
+npm run build
+npm run lint
+npm test
 ```
 
-Frontend: `http://localhost:3000`
-Backend: `http://localhost:8080`
+Frontend:
 
-## Testnet connectivity notes
+```bash
+cd frontend
+npm run build
+npm test
+```
 
-- Set `KASPA_RPC_TARGET` in `.env` to a valid testnet gRPC target (`host:port`).
-- If node connectivity is wrong, frontend still loads, but balance/health will show degraded state.
-- For strict signature enforcement, set `ALLOW_UNVERIFIED_WALLET_SIG=false`.
+## Deploy path
 
-## Wallet compatibility
+- Dockerized deployment via `docker compose` included.
+- Frontend serves via nginx image; backend exposes health + metrics endpoints.
+- For production:
+  - set strong `JWT_SECRET`
+  - point `KASPA_RPC_TARGET` at a hardened node
+  - set `ALLOW_UNVERIFIED_WALLET_SIG=false`
+  - set production `CORS_ORIGIN`
 
-- Kasware: browser-injected provider (`window.kasware`) for account access and message signing.
-- Kaspium: manual address mode plus `kaspa:` URI deep link generation.
+## Analytics / telemetry
+
+`/metrics` includes:
+
+- HTTP request counters and latency histograms
+- business event counters:
+  - `signup_started`
+  - `activation_completed`
+  - `payment_intent_created`
+
+## Troubleshooting
+
+- `503` on `/readyz`: Kaspa node likely unavailable or missing `--utxoindex`.
+- Invalid address errors: ensure prefix is in `KASPA_ALLOWED_ADDRESS_PREFIXES`.
+- Payment quote rejected: check amount format (`N` or `N.x` up to 8 decimals).
+- Kasware connect failure: verify extension is installed and unlocked.
+- Kaspium deeplink issues: use a compatible mobile wallet with `kaspa:` URI support.
