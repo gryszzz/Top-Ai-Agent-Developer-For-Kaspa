@@ -1,52 +1,68 @@
-# Top AI Agent Developer For Kaspa
+# Kaspa Sovereign Architect Engine
 
-This repository contains Kaspa-focused projects, training corpora, and a custom Codex skill:
+Production-grade Codex skill for deep Kaspa protocol engineering, wallet/backend architecture, DeFi system design, and reliability-first delivery.
 
-- **Skill name:** `$kaspa-sovereign-architect-engine`
-- **Skill path:** `skills/public/kaspa-sovereign-architect-engine`
-- **Purpose:** protocol-first Kaspa architecture, reliability engineering, threat simulation, and iterative optimization.
+## What This Is
 
-## Use The Agent
+This repo ships a reusable AI skill package:
 
-In Codex, invoke the skill explicitly in your prompt:
+- Skill ID: `$kaspa-sovereign-architect-engine`
+- Skill source: `skills/public/kaspa-sovereign-architect-engine/`
+- Distribution model: GitHub Releases (zip asset)
+
+It is not a website product. It is an installable skill for Codex workflows.
+
+## What I Am
+
+`$kaspa-sovereign-architect-engine` is a specialized Kaspa systems agent that operates across:
+
+- Protocol: BlockDAG, GHOSTDAG, mempool, UTXO semantics.
+- Indexing: DAG-aware UTXO/event indexing and conflict handling.
+- Backend: production APIs, workers, retries, caching, validation.
+- Frontend: wallet-aware UX, confirmation states, confidence-driven flows.
+- DevOps/Security: Docker, CI/CD, observability, threat modeling.
+
+## How To Use Me In Codex
+
+Call the skill by name in your prompt:
 
 ```text
 $kaspa-sovereign-architect-engine
-Design a production-ready Kaspa indexer + API with chaos testing and recovery playbooks.
+Design a production-ready Kaspa indexer and API with retry-safe workers and monitoring.
 ```
 
-Or include it inline:
+Or embed it in a direct task:
 
 ```text
-Use $kaspa-sovereign-architect-engine to audit my Kaspa wallet backend for replay and double-spend risks.
+Use $kaspa-sovereign-architect-engine to audit my wallet backend for replay, nonce, and signing risks.
 ```
 
-## What The Agent Enforces
+## Install The Skill
 
-- First-principles reasoning for BlockDAG, GHOSTDAG, UTXO, transaction lifecycle.
-- Multi-layer design coverage: protocol, indexer, backend, frontend, DevOps, security.
-- Dynamic validation: unit/integration/stress/chaos checks and recovery planning.
-- Iteration loop: reflection, comparative optimization, and next-step experiment rules.
+### Option A: Install from latest release package
 
-## Distribution
+```bash
+mkdir -p "$CODEX_HOME/skills"
+curl -L -o /tmp/kaspa-sovereign-architect-engine.zip \
+  https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases/latest/download/kaspa-sovereign-architect-engine.zip
+unzip -o /tmp/kaspa-sovereign-architect-engine.zip -d "$CODEX_HOME/skills"
+```
 
-This project is distributed as a versioned GitHub Release asset (zip), not as a website.
+### Option B: Install from repository source
 
-Latest releases:
+```bash
+mkdir -p "$CODEX_HOME/skills/public"
+cp -R skills/public/kaspa-sovereign-architect-engine "$CODEX_HOME/skills/public/"
+```
 
-- [https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
+## Releases
+
+- Releases: [https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
+- Packaging workflow: `.github/workflows/release-skill.yml`
 
 ## Repo Highlights
 
-- `skills/public/kaspa-sovereign-architect-engine/` – custom skill definition and references
-- `training-corpus/kaspa-pdf-markdown/` – extracted PDF training corpus
-- `kaspa-balance-api/` – production-oriented Kaspa balance API example
-- `kaspa-codex-evolution-loop/` – autonomous iteration and simulation framework
-
-## Local Docs Preview (Optional)
-
-```bash
-python3 -m http.server 8000 -d docs
-```
-
-Then open `http://localhost:8000`.
+- `skills/public/kaspa-sovereign-architect-engine/` - skill definition, behavior, references.
+- `training-corpus/kaspa-pdf-markdown/` - normalized corpus from source documents.
+- `kaspa-balance-api/` - production-oriented Kaspa balance API example.
+- `kaspa-codex-evolution-loop/` - autonomous iteration and simulation framework.
