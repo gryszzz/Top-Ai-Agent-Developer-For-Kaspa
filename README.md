@@ -167,6 +167,8 @@ Design a Kaspa DAG-aware indexer for 100k users with failure recovery and replay
 
 - Auto-deploy workflow: [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
 - GitHub Pages landing page: [Live Site](https://gryszzz.github.io/Top-Ai-Agent-Developer-For-Kaspa/)
+- Custom domain support: set repo variable `GH_PAGES_CNAME` (for example `skill.yourdomain.com`); workflow writes `CNAME` automatically
+- Domain setup guide: [`docs/domain-setup.md`](docs/domain-setup.md)
 - Launch copy + channel templates: [`docs/launch-kit.html`](docs/launch-kit.html)
 - SEO files: [`docs/robots.txt`](docs/robots.txt), [`docs/sitemap.xml`](docs/sitemap.xml)
 - Scaling runbook: [`docs/scaling-plan.md`](docs/scaling-plan.md)

@@ -30,10 +30,20 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare Pages artifact
+        id: upload
+        run: |
+          rm -rf /tmp/pages-artifact
+          mkdir -p /tmp/pages-artifact
+          cp -R docs/. /tmp/pages-artifact/
+          if [ -n "${{ vars.GH_PAGES_CNAME }}" ]; then
+            echo "${{ vars.GH_PAGES_CNAME }}" > /tmp/pages-artifact/CNAME
+          fi
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: /tmp/pages-artifact
 
       - name: Deploy to GitHub Pages
         id: deployment
