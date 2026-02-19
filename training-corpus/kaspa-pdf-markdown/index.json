@@ -1,59 +1,59 @@
 {
   "generated_at": "2026-02-19T05:45:28.858185Z",
   "source_dir": "/Users/anthonygryszkin/Downloads",
-  "output_dir": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown",
+  "output_dir": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown",
   "documents": [
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/3d graphics ui.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/3d-graphics-ui.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/3d-graphics-ui.md",
       "pages": 2,
       "total_chars": 1926
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-00-Ecosystem-North-Star-Blueprint.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-00-ecosystem-north-star-blueprint.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-00-ecosystem-north-star-blueprint.md",
       "pages": 4,
       "total_chars": 3773
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-01-Protocol-and-GhostDAG-Foundations.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-01-protocol-and-ghostdag-foundations.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-01-protocol-and-ghostdag-foundations.md",
       "pages": 2,
       "total_chars": 3014
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-02-Wallet-and-Identity-Architecture.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-02-wallet-and-identity-architecture.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-02-wallet-and-identity-architecture.md",
       "pages": 2,
       "total_chars": 3014
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-03-Indexer-and-Data-Plane-Design.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-03-indexer-and-data-plane-design.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-03-indexer-and-data-plane-design.md",
       "pages": 3,
       "total_chars": 3206
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-04-DApp-and-API-Integration-Model.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-04-dapp-and-api-integration-model.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-04-dapp-and-api-integration-model.md",
       "pages": 3,
       "total_chars": 3110
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-05-DeFi-Modules-and-Execution-Flows.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-05-defi-modules-and-execution-flows.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-05-defi-modules-and-execution-flows.md",
       "pages": 2,
       "total_chars": 2611
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-06-Observability-Security-and-SRE-Runbook.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-06-observability-security-and-sre-runbook.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-06-observability-security-and-sre-runbook.md",
       "pages": 2,
       "total_chars": 2061
     },
     {
       "source_pdf": "/Users/anthonygryszkin/Downloads/Kaspa-07-Sovereign-Autonomous-Lab-Architecture.pdf",
-      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Researcher/training-corpus/kaspa-pdf-markdown/kaspa-07-sovereign-autonomous-lab-architecture.md",
+      "output_markdown": "/Users/anthonygryszkin/Desktop/Top Kaspa Developer/training-corpus/kaspa-pdf-markdown/kaspa-07-sovereign-autonomous-lab-architecture.md",
       "pages": 1,
       "total_chars": 1904
     }
