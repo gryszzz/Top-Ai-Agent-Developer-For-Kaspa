@@ -1,0 +1,72 @@
+name: Fullstack CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "kaspa-wallet-fullstack/**"
+      - ".github/workflows/fullstack-ci.yml"
+  pull_request:
+    paths:
+      - "kaspa-wallet-fullstack/**"
+      - ".github/workflows/fullstack-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend build/lint/test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kaspa-wallet-fullstack/backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: kaspa-wallet-fullstack/backend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint/typecheck
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+  frontend:
+    name: Frontend build/test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kaspa-wallet-fullstack/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: kaspa-wallet-fullstack/frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build (typecheck + bundle)
+        run: npm run build
+
+      - name: Test
+        run: npm test
