@@ -1,0 +1,43 @@
+name: Release Skill Package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package skill
+        run: |
+          cd skills/public
+          zip -r "$GITHUB_WORKSPACE/kaspa-sovereign-architect-engine.zip" kaspa-sovereign-architect-engine
+
+      - name: Resolve release notes
+        id: notes
+        shell: bash
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          NOTES_FILE="$GITHUB_WORKSPACE/release-notes/${TAG_NAME}.md"
+          if [[ -f "$NOTES_FILE" ]]; then
+            echo "notes_file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
+          else
+            FALLBACK="$GITHUB_WORKSPACE/release-notes/v1.0.0.md"
+            echo "notes_file=$FALLBACK" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: kaspa-sovereign-architect-engine.zip
+          body_path: ${{ steps.notes.outputs.notes_file }}
+          name: Kaspa Sovereign Architect Engine ${{ github.ref_name }}
+          generate_release_notes: true

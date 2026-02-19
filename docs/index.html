@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kaspa Sovereign Architect Engine</title>
+    <style>
+      :root {
+        --bg: #05070f;
+        --bg-soft: #0d1324;
+        --panel: #11192b;
+        --line: #213252;
+        --text: #e6eefc;
+        --muted: #9bb0d6;
+        --brand: #42dbc3;
+        --brand-deep: #1fa899;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background: radial-gradient(1200px 800px at 50% 5%, #12203a 0%, var(--bg) 60%);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 20px 64px;
+      }
+      .hero {
+        display: grid;
+        gap: 18px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(160deg, rgba(66, 219, 195, 0.08), rgba(11, 16, 33, 0.92));
+        padding: 22px;
+      }
+      .hero img {
+        width: 220px;
+        max-width: 100%;
+        border-radius: 12px;
+        border: 1px solid #2a3f68;
+      }
+      h1 { margin: 0; font-size: 30px; line-height: 1.15; }
+      p { margin: 0; color: var(--muted); line-height: 1.6; }
+      .grid {
+        margin-top: 20px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+      .card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 16px;
+        color: var(--brand);
+      }
+      pre {
+        margin: 10px 0 0;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #2a3f68;
+        background: #0a1020;
+        color: #d9e6ff;
+        overflow-x: auto;
+        font-size: 13px;
+      }
+      a { color: var(--brand); }
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <img src="./assets/forge-os-logo.png" alt="Kaspa Sovereign Architect Engine Logo" />
+        <h1>Kaspa Sovereign Architect Engine</h1>
+        <p>
+          A Codex skill for protocol-first Kaspa engineering: architecture, reliability, threat simulation,
+          scaling strategy, and iterative optimization.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>How To Invoke</h2>
+          <p>Use the skill name directly in your prompt:</p>
+          <pre>$kaspa-sovereign-architect-engine
+Design a Kaspa indexer with failure recovery playbooks.</pre>
+        </article>
+
+        <article class="card">
+          <h2>What It Covers</h2>
+          <p>
+            BlockDAG/GHOSTDAG fundamentals, UTXO lifecycle, wallet + backend architecture, DevOps and SRE,
+            chaos testing, and ecosystem strategy.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Skill Files</h2>
+          <p>Repository paths:</p>
+          <pre>skills/public/kaspa-sovereign-architect-engine/SKILL.md
+skills/public/kaspa-sovereign-architect-engine/agents/openai.yaml</pre>
+        </article>
+
+        <article class="card">
+          <h2>Repository</h2>
+          <p>
+            <a href="https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa" target="_blank" rel="noreferrer">
+              github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa
+            </a>
+          </p>
+        </article>
+      </section>
+
+      <p class="footer">Built for continuous Kaspa ecosystem learning, validation, and production execution.</p>
+    </main>
+  </body>
+</html>
