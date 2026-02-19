@@ -1,6 +1,6 @@
 # 🧠 Kaspa Sovereign Architect Engine
 
-**Codex-native Kaspa engineering skill** with **cross-platform adapters** for OpenAI, Claude, Cursor, OpenClaw, and generic LLM workflows.
+**Codex-native Kaspa engineering skill** with **cross-platform adapters** for OpenAI, Claude, Cursor, and generic LLM workflows.
 
 ## 🚀 What This Is
 
@@ -44,7 +44,6 @@ Use $kaspa-sovereign-architect-engine to audit my wallet backend for replay, non
 | OpenAI-style agents | ✅ Adapter | [`agents/openai.yaml`](skills/public/kaspa-sovereign-architect-engine/agents/openai.yaml) |
 | Claude / Anthropic | ✅ Adapter | [`agents/anthropic.md`](skills/public/kaspa-sovereign-architect-engine/agents/anthropic.md) |
 | Cursor | ✅ Adapter | [`agents/cursor.mdc`](skills/public/kaspa-sovereign-architect-engine/agents/cursor.mdc) |
-| OpenClaw | ✅ Adapter | [`agents/openclaw.md`](skills/public/kaspa-sovereign-architect-engine/agents/openclaw.md) |
 | Any LLM platform | ✅ Adapter | [`agents/generic-system-prompt.md`](skills/public/kaspa-sovereign-architect-engine/agents/generic-system-prompt.md) |
 
 Compatibility metadata:
