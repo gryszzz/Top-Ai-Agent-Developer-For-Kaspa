@@ -11,7 +11,7 @@ const manifestPath = path.join(rootDir, "manifest.json");
 const openaiPath = path.join(rootDir, "agents", "openai.yaml");
 const logoPath = path.join(rootDir, "assets", "forge-os-logo.png");
 
-const requiredTargets = ["codex", "openai", "anthropic", "cursor", "generic"];
+const requiredTargets = ["codex", "openai", "anthropic", "cursor", "openclaw", "generic"];
 
 function ok(msg) {
   console.log(`[ok] ${msg}`);
@@ -128,6 +128,13 @@ function validateTarget(targetId, manifest) {
         fail("cursor adapter missing frontmatter");
       } else {
         ok("cursor adapter frontmatter present");
+      }
+      break;
+    case "openclaw":
+      if (!content.includes("Required Output Structure")) {
+        fail("openclaw adapter missing required output contract");
+      } else {
+        ok("openclaw adapter includes output contract");
       }
       break;
     case "generic":

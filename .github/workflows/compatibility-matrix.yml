@@ -43,6 +43,7 @@ jobs:
           - openai
           - anthropic
           - cursor
+          - openclaw
           - generic
     steps:
       - name: Checkout

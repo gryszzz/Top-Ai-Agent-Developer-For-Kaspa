@@ -25,6 +25,11 @@
       "notes": "Cursor rules file."
     },
     {
+      "id": "openclaw",
+      "entry": "agents/openclaw.md",
+      "notes": "OpenClaw system prompt adapter."
+    },
+    {
       "id": "generic",
       "entry": "agents/generic-system-prompt.md",
       "notes": "Use as a system or developer prompt in any LLM platform."
