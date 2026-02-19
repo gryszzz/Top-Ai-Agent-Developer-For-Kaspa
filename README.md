@@ -4,9 +4,7 @@
 
 ![Forge OS Logo](skills/public/kaspa-sovereign-architect-engine/assets/forge-os-logo.png)
 
-[![Releases](https://img.shields.io/github/v/release/gryszzz/Top-Ai-Agent-Developer-For-Kaspa?label=release)](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
-[![Repo](https://img.shields.io/badge/repo-Top--Ai--Agent--Developer--For--Kaspa-0a0a0a)](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa)
-
+[![Releases]
 ## 🚀 What This Is
 
 This repository publishes a reusable AI skill package for serious Kaspa engineering.
