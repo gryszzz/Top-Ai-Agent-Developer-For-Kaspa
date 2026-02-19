@@ -2,9 +2,6 @@
 
 **Codex-native Kaspa engineering skill** with **cross-platform adapters** for OpenAI, Claude, Cursor, and generic LLM workflows.
 
-![Forge OS Logo](skills/public/kaspa-sovereign-architect-engine/assets/forge-os-logo.png)
-
-[![Releases]
 ## 🚀 What This Is
 
 This repository publishes a reusable AI skill package for serious Kaspa engineering.
