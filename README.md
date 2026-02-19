@@ -94,6 +94,23 @@ Export adapter bundle:
 ./skills/public/kaspa-sovereign-architect-engine/scripts/export-adapters.sh
 ```
 
+### Option D: Install for OpenClaw
+
+OpenClaw loads AgentSkills-compatible folders from `~/.openclaw/skills` or `<workspace>/skills`.
+
+Install globally for OpenClaw (macOS/Linux):
+
+```bash
+./skills/public/kaspa-sovereign-architect-engine/scripts/install-openclaw.sh
+```
+
+Install manually into an OpenClaw workspace:
+
+```bash
+mkdir -p ./skills
+cp -R skills/public/kaspa-sovereign-architect-engine ./skills/
+```
+
 ## 🌍 Use Outside Codex
 
 1. Open an adapter file from [`agents/`](skills/public/kaspa-sovereign-architect-engine/agents/).
