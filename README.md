@@ -147,6 +147,13 @@ Design a Kaspa DAG-aware indexer for 100k users with failure recovery and replay
 - Download packages: [Releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
 - Automated packaging workflow: [`.github/workflows/release-skill.yml`](.github/workflows/release-skill.yml)
 
+## 🌐 Deploy + Marketing
+
+- Auto-deploy workflow: [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+- GitHub Pages landing page: [Live Site](https://gryszzz.github.io/Top-Ai-Agent-Developer-For-Kaspa/)
+- Launch copy + channel templates: [`docs/launch-kit.html`](docs/launch-kit.html)
+- SEO files: [`docs/robots.txt`](docs/robots.txt), [`docs/sitemap.xml`](docs/sitemap.xml)
+
 ## 📁 Repository Map
 
 - [`skills/public/kaspa-sovereign-architect-engine/`](skills/public/kaspa-sovereign-architect-engine/) - core skill package
