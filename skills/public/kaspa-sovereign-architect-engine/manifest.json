@@ -1,6 +1,6 @@
 {
   "name": "kaspa-sovereign-architect-engine",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Kaspa protocol and ecosystem architecture skill with reliability and security focus.",
   "license": "MIT",
   "targets": [
