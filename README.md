@@ -68,6 +68,22 @@ curl -L -o /tmp/kaspa-sovereign-architect-engine.zip \
 unzip -o /tmp/kaspa-sovereign-architect-engine.zip -d "$CODEX_HOME/skills"
 ```
 
+Verify artifact integrity:
+
+```bash
+curl -L -o /tmp/SHA256SUMS.txt \
+  https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases/latest/download/SHA256SUMS.txt
+(cd /tmp && grep "kaspa-sovereign-architect-engine.zip$" SHA256SUMS.txt | shasum -a 256 -c -)
+```
+
+Alternative tarball install:
+
+```bash
+curl -L -o /tmp/kaspa-sovereign-architect-engine.tar.gz \
+  https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases/latest/download/kaspa-sovereign-architect-engine.tar.gz
+tar -xzf /tmp/kaspa-sovereign-architect-engine.tar.gz -C "$CODEX_HOME/skills"
+```
+
 ### Option B: Install from source
 
 ```bash
@@ -153,6 +169,7 @@ Design a Kaspa DAG-aware indexer for 100k users with failure recovery and replay
 - GitHub Pages landing page: [Live Site](https://gryszzz.github.io/Top-Ai-Agent-Developer-For-Kaspa/)
 - Launch copy + channel templates: [`docs/launch-kit.html`](docs/launch-kit.html)
 - SEO files: [`docs/robots.txt`](docs/robots.txt), [`docs/sitemap.xml`](docs/sitemap.xml)
+- Scaling runbook: [`docs/scaling-plan.md`](docs/scaling-plan.md)
 
 ## 📁 Repository Map
 

@@ -164,12 +164,14 @@ function validateScripts() {
   const openclawInstall = path.join(rootDir, "scripts", "install-openclaw.sh");
   const pwshInstall = path.join(rootDir, "scripts", "install-codex.ps1");
   const exportScript = path.join(rootDir, "scripts", "export-adapters.sh");
+  const packageScript = path.join(rootDir, "scripts", "package-release.sh");
 
   assertFile(bashInstall, "install-codex.sh");
   assertFile(geminiInstall, "install-gemini.sh");
   assertFile(openclawInstall, "install-openclaw.sh");
   assertFile(pwshInstall, "install-codex.ps1");
   assertFile(exportScript, "export-adapters.sh");
+  assertFile(packageScript, "package-release.sh");
 }
 
 function main() {

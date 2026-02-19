@@ -24,10 +24,9 @@ jobs:
       - name: Validate compatibility (release gate)
         run: node skills/public/kaspa-sovereign-architect-engine/scripts/validate-compatibility.mjs --all
 
-      - name: Package skill
+      - name: Package skill artifacts
         run: |
-          cd skills/public
-          zip -r "$GITHUB_WORKSPACE/kaspa-sovereign-architect-engine.zip" kaspa-sovereign-architect-engine
+          skills/public/kaspa-sovereign-architect-engine/scripts/package-release.sh "$GITHUB_WORKSPACE/dist-artifacts" "${GITHUB_REF_NAME}"
 
       - name: Resolve release notes
         id: notes
@@ -45,7 +44,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: kaspa-sovereign-architect-engine.zip
+          files: dist-artifacts/*
           body_path: ${{ steps.notes.outputs.notes_file }}
           name: Kaspa Sovereign Architect Engine ${{ github.ref_name }}
           generate_release_notes: true

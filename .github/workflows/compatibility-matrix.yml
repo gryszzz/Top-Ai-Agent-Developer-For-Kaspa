@@ -57,3 +57,71 @@ jobs:
 
       - name: Validate target
         run: node skills/public/kaspa-sovereign-architect-engine/scripts/validate-compatibility.mjs --target ${{ matrix.target }}
+
+  unix-installer-smoke:
+    name: Installer smoke (${{ matrix.os }} / ${{ matrix.script }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        script:
+          - install-codex.sh
+          - install-openclaw.sh
+          - install-gemini.sh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run installer
+        shell: bash
+        run: |
+          TMP_HOME="$RUNNER_TEMP/home"
+          mkdir -p "$TMP_HOME"
+          export HOME="$TMP_HOME"
+          export CODEX_HOME="$TMP_HOME/.codex"
+          export OPENCLAW_SKILLS_DIR="$TMP_HOME/.openclaw/skills"
+          export GEMINI_HOME="$TMP_HOME/.gemini"
+          "skills/public/kaspa-sovereign-architect-engine/scripts/${{ matrix.script }}"
+
+      - name: Verify install output
+        shell: bash
+        run: |
+          case "${{ matrix.script }}" in
+            install-codex.sh)
+              test -f "$RUNNER_TEMP/home/.codex/skills/public/kaspa-sovereign-architect-engine/SKILL.md"
+              ;;
+            install-openclaw.sh)
+              test -f "$RUNNER_TEMP/home/.openclaw/skills/kaspa-sovereign-architect-engine/SKILL.md"
+              ;;
+            install-gemini.sh)
+              test -f "$RUNNER_TEMP/home/.gemini/kaspa-sovereign-architect-engine.gemini.md"
+              grep -n "kaspa-sovereign-architect-engine.gemini.md" "$RUNNER_TEMP/home/.gemini/GEMINI.md"
+              ;;
+          esac
+
+  windows-installer-smoke:
+    name: Installer smoke (windows / install-codex.ps1)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run PowerShell installer
+        shell: pwsh
+        run: |
+          $tempHome = Join-Path $env:RUNNER_TEMP "home"
+          New-Item -ItemType Directory -Force -Path $tempHome | Out-Null
+          $env:HOME = $tempHome
+          $env:CODEX_HOME = Join-Path $tempHome ".codex"
+          .\skills\public\kaspa-sovereign-architect-engine\scripts\install-codex.ps1
+
+      - name: Verify install output
+        shell: pwsh
+        run: |
+          $skillFile = Join-Path $env:RUNNER_TEMP "home/.codex/skills/public/kaspa-sovereign-architect-engine/SKILL.md"
+          if (!(Test-Path $skillFile)) {
+            Write-Error "Expected skill file missing: $skillFile"
+          }
