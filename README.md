@@ -1,54 +1,63 @@
-# Kaspa Sovereign Architect Engine
+# 🧠 Kaspa Sovereign Architect Engine
 
-Production-grade AI skill for deep Kaspa protocol engineering, wallet/backend architecture, DeFi system design, and reliability-first delivery.
+**Codex-native Kaspa engineering skill** with **cross-platform adapters** for OpenAI, Claude, Cursor, and generic LLM workflows.
 
-## What This Is
+![Forge OS Logo](skills/public/kaspa-sovereign-architect-engine/assets/forge-os-logo.png)
 
-This repo ships a reusable AI skill package:
+[![Releases](https://img.shields.io/github/v/release/gryszzz/Top-Ai-Agent-Developer-For-Kaspa?label=release)](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
+[![Repo](https://img.shields.io/badge/repo-Top--Ai--Agent--Developer--For--Kaspa-0a0a0a)](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa)
 
-- Skill ID: `$kaspa-sovereign-architect-engine`
-- Skill source: `skills/public/kaspa-sovereign-architect-engine/`
-- Distribution model: GitHub Releases (zip asset)
+## 🚀 What This Is
 
-It is not a website product. It is an installable skill package with adapters for multiple AI environments.
+This repository publishes a reusable AI skill package for serious Kaspa engineering.
 
-## What I Am
+- **Skill ID:** `$kaspa-sovereign-architect-engine`
+- **Main skill file:** [`SKILL.md`](skills/public/kaspa-sovereign-architect-engine/SKILL.md)
+- **Release downloads:** [GitHub Releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
+- **Positioning:** package-first distribution (not a website product)
 
-`$kaspa-sovereign-architect-engine` is a specialized Kaspa systems agent that operates across:
+## 🔥 What This Agent Is Good At
 
-- Protocol: BlockDAG, GHOSTDAG, mempool, UTXO semantics.
-- Indexing: DAG-aware UTXO/event indexing and conflict handling.
-- Backend: production APIs, workers, retries, caching, validation.
-- Frontend: wallet-aware UX, confirmation states, confidence-driven flows.
-- DevOps/Security: Docker, CI/CD, observability, threat modeling.
+`$kaspa-sovereign-architect-engine` focuses on:
 
-## How To Use Me In Codex
+- **Protocol engineering:** BlockDAG, GHOSTDAG, mempool, UTXO semantics
+- **Indexer architecture:** DAG-aware indexing, conflict handling, consistency flows
+- **Backend reliability:** APIs, workers, retries, caching, validation, observability
+- **Wallet + UX:** wallet-aware transaction lifecycle and confirmation state UX
+- **Security rigor:** threat modeling, key boundaries, replay and double-spend controls
 
-Call the skill by name in your prompt:
+## ⚡ Quick Start (Codex)
+
+Use the skill name in your prompt:
 
 ```text
 $kaspa-sovereign-architect-engine
-Design a production-ready Kaspa indexer and API with retry-safe workers and monitoring.
+Design a production-ready Kaspa indexer + API with retry-safe workers and monitoring.
 ```
 
-Or embed it in a direct task:
+Or embed it directly:
 
 ```text
 Use $kaspa-sovereign-architect-engine to audit my wallet backend for replay, nonce, and signing risks.
 ```
 
-## Compatibility
+## 🧩 Compatibility Matrix
 
-- Codex native skill: `SKILL.md`
-- OpenAI-compatible metadata: `agents/openai.yaml`
-- Claude/Anthropic adapter: `agents/anthropic.md`
-- Cursor rules adapter: `agents/cursor.mdc`
-- Generic LLM adapter: `agents/generic-system-prompt.md`
-- Compatibility manifest: `manifest.json`
+| Platform | Status | Adapter |
+|---|---|---|
+| Codex | ✅ Native | [`SKILL.md`](skills/public/kaspa-sovereign-architect-engine/SKILL.md) |
+| OpenAI-style agents | ✅ Adapter | [`agents/openai.yaml`](skills/public/kaspa-sovereign-architect-engine/agents/openai.yaml) |
+| Claude / Anthropic | ✅ Adapter | [`agents/anthropic.md`](skills/public/kaspa-sovereign-architect-engine/agents/anthropic.md) |
+| Cursor | ✅ Adapter | [`agents/cursor.mdc`](skills/public/kaspa-sovereign-architect-engine/agents/cursor.mdc) |
+| Any LLM platform | ✅ Adapter | [`agents/generic-system-prompt.md`](skills/public/kaspa-sovereign-architect-engine/agents/generic-system-prompt.md) |
 
-## Install The Skill
+Compatibility metadata:
 
-### Option A: Install from latest release package
+- [`manifest.json`](skills/public/kaspa-sovereign-architect-engine/manifest.json)
+
+## 🛠 Install
+
+### Option A: Install latest release (recommended)
 
 ```bash
 mkdir -p "$CODEX_HOME/skills"
@@ -57,14 +66,14 @@ curl -L -o /tmp/kaspa-sovereign-architect-engine.zip \
 unzip -o /tmp/kaspa-sovereign-architect-engine.zip -d "$CODEX_HOME/skills"
 ```
 
-### Option B: Install from repository source
+### Option B: Install from source
 
 ```bash
 mkdir -p "$CODEX_HOME/skills/public"
 cp -R skills/public/kaspa-sovereign-architect-engine "$CODEX_HOME/skills/public/"
 ```
 
-### Option C: One-command install scripts
+### Option C: Install scripts
 
 macOS/Linux:
 
@@ -78,26 +87,32 @@ Windows PowerShell:
 .\skills\public\kaspa-sovereign-architect-engine\scripts\install-codex.ps1
 ```
 
-Export non-Codex adapter pack:
+Export adapter bundle:
 
 ```bash
 ./skills/public/kaspa-sovereign-architect-engine/scripts/export-adapters.sh
 ```
 
-## Using It Outside Codex
+## 🌍 Use Outside Codex
 
-1. Pick an adapter file from `skills/public/kaspa-sovereign-architect-engine/agents/`.
-2. Copy its content into your platform's system/developer instruction field.
-3. Add your task prompt (for example: "Design a Kaspa DAG-aware indexer for 100k users with failure recovery").
+1. Open an adapter file from [`agents/`](skills/public/kaspa-sovereign-architect-engine/agents/).
+2. Copy its contents into your platform's system/developer instructions.
+3. Add your actual task prompt.
 
-## Releases
+Example task prompt:
 
-- Releases: [https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
-- Packaging workflow: `.github/workflows/release-skill.yml`
+```text
+Design a Kaspa DAG-aware indexer for 100k users with failure recovery and replay-safe event handling.
+```
 
-## Repo Highlights
+## 📦 Releases
 
-- `skills/public/kaspa-sovereign-architect-engine/` - skill definition, behavior, references.
-- `training-corpus/kaspa-pdf-markdown/` - normalized corpus from source documents.
-- `kaspa-balance-api/` - production-oriented Kaspa balance API example.
-- `kaspa-codex-evolution-loop/` - autonomous iteration and simulation framework.
+- Download packages: [Releases](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/releases)
+- Automated packaging workflow: [`.github/workflows/release-skill.yml`](.github/workflows/release-skill.yml)
+
+## 📁 Repository Map
+
+- [`skills/public/kaspa-sovereign-architect-engine/`](skills/public/kaspa-sovereign-architect-engine/) - core skill package
+- [`training-corpus/kaspa-pdf-markdown/`](training-corpus/kaspa-pdf-markdown/) - normalized Kaspa corpus
+- [`kaspa-balance-api/`](kaspa-balance-api/) - production-oriented Kaspa API sample
+- [`kaspa-codex-evolution-loop/`](kaspa-codex-evolution-loop/) - autonomous iteration framework
