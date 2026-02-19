@@ -44,6 +44,7 @@ jobs:
           - anthropic
           - cursor
           - openclaw
+          - gemini
           - generic
     steps:
       - name: Checkout

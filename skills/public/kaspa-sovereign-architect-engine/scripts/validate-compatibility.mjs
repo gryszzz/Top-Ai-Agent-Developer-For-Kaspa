@@ -11,7 +11,7 @@ const manifestPath = path.join(rootDir, "manifest.json");
 const openaiPath = path.join(rootDir, "agents", "openai.yaml");
 const logoPath = path.join(rootDir, "assets", "forge-os-logo.png");
 
-const requiredTargets = ["codex", "openai", "anthropic", "cursor", "openclaw", "generic"];
+const requiredTargets = ["codex", "openai", "anthropic", "cursor", "openclaw", "gemini", "generic"];
 
 function ok(msg) {
   console.log(`[ok] ${msg}`);
@@ -137,6 +137,15 @@ function validateTarget(targetId, manifest) {
         ok("openclaw adapter includes output contract");
       }
       break;
+    case "gemini":
+      if (!content.includes("Gemini CLI")) {
+        fail("gemini adapter missing Gemini CLI usage guidance");
+      } else if (!content.includes("Required Output Structure")) {
+        fail("gemini adapter missing required output contract");
+      } else {
+        ok("gemini adapter includes output contract");
+      }
+      break;
     case "generic":
       if (!content.includes("Every response must include")) {
         fail("generic adapter missing required response contract");
@@ -151,10 +160,14 @@ function validateTarget(targetId, manifest) {
 
 function validateScripts() {
   const bashInstall = path.join(rootDir, "scripts", "install-codex.sh");
+  const geminiInstall = path.join(rootDir, "scripts", "install-gemini.sh");
+  const openclawInstall = path.join(rootDir, "scripts", "install-openclaw.sh");
   const pwshInstall = path.join(rootDir, "scripts", "install-codex.ps1");
   const exportScript = path.join(rootDir, "scripts", "export-adapters.sh");
 
   assertFile(bashInstall, "install-codex.sh");
+  assertFile(geminiInstall, "install-gemini.sh");
+  assertFile(openclawInstall, "install-openclaw.sh");
   assertFile(pwshInstall, "install-codex.ps1");
   assertFile(exportScript, "export-adapters.sh");
 }

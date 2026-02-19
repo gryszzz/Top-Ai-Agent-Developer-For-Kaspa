@@ -1,6 +1,6 @@
 # 🧠 Kaspa Sovereign Architect Engine
 
-**Codex-native Kaspa engineering skill** with **cross-platform adapters** for OpenAI, Claude, Cursor, OpenClaw, and generic LLM workflows.
+**Codex-native Kaspa engineering skill** with **cross-platform adapters** for OpenAI, Claude, Cursor, OpenClaw, Gemini CLI, and generic LLM workflows.
 
 ## 🚀 What This Is
 
@@ -45,6 +45,7 @@ Use $kaspa-sovereign-architect-engine to audit my wallet backend for replay, non
 | Claude / Anthropic | ✅ Adapter | [`agents/anthropic.md`](skills/public/kaspa-sovereign-architect-engine/agents/anthropic.md) |
 | Cursor | ✅ Adapter | [`agents/cursor.mdc`](skills/public/kaspa-sovereign-architect-engine/agents/cursor.mdc) |
 | OpenClaw | ✅ Adapter | [`agents/openclaw.md`](skills/public/kaspa-sovereign-architect-engine/agents/openclaw.md) |
+| Gemini CLI | ✅ Adapter | [`agents/gemini.md`](skills/public/kaspa-sovereign-architect-engine/agents/gemini.md) |
 | Any LLM platform | ✅ Adapter | [`agents/generic-system-prompt.md`](skills/public/kaspa-sovereign-architect-engine/agents/generic-system-prompt.md) |
 
 Compatibility metadata:
@@ -109,6 +110,24 @@ Install manually into an OpenClaw workspace:
 ```bash
 mkdir -p ./skills
 cp -R skills/public/kaspa-sovereign-architect-engine ./skills/
+```
+
+### Option E: Install for Gemini CLI
+
+Gemini CLI loads context from `~/.gemini/GEMINI.md` and supports `@` imports.
+
+Install adapter globally (macOS/Linux):
+
+```bash
+./skills/public/kaspa-sovereign-architect-engine/scripts/install-gemini.sh
+```
+
+Manual install:
+
+```bash
+mkdir -p ~/.gemini
+cp skills/public/kaspa-sovereign-architect-engine/agents/gemini.md ~/.gemini/kaspa-sovereign-architect-engine.gemini.md
+printf "\n@%s\n" "$HOME/.gemini/kaspa-sovereign-architect-engine.gemini.md" >> ~/.gemini/GEMINI.md
 ```
 
 ## 🌍 Use Outside Codex

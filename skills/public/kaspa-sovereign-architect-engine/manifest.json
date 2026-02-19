@@ -30,6 +30,11 @@
       "notes": "OpenClaw system prompt adapter."
     },
     {
+      "id": "gemini",
+      "entry": "agents/gemini.md",
+      "notes": "Gemini CLI GEMINI.md adapter."
+    },
+    {
       "id": "generic",
       "entry": "agents/generic-system-prompt.md",
       "notes": "Use as a system or developer prompt in any LLM platform."
