@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - .env
+    environment:
+      PORT: ${BACKEND_PORT:-8080}
+      KASPA_RPC_TARGET: ${KASPA_RPC_TARGET}
+      KASPA_NETWORK: ${KASPA_NETWORK:-testnet-10}
+      KASPA_ALLOWED_ADDRESS_PREFIXES: ${KASPA_ALLOWED_ADDRESS_PREFIXES:-kaspatest}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      ALLOW_UNVERIFIED_WALLET_SIG: ${ALLOW_UNVERIFIED_WALLET_SIG:-true}
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-3000}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]

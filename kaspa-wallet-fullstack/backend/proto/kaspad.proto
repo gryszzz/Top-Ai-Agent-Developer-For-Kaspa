@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package protowire;
+
+message RPCError {
+  string message = 1;
+}
+
+message GetBalanceByAddressRequestMessage {
+  string address = 1;
+}
+
+message GetBalanceByAddressResponseMessage {
+  uint64 balance = 1;
+  RPCError error = 1000;
+}
+
+message GetServerInfoRequestMessage {}
+
+message GetServerInfoResponseMessage {
+  uint32 rpcApiVersion = 1;
+  uint32 rpcApiRevision = 2;
+  string serverVersion = 3;
+  string networkId = 4;
+  bool hasUtxoIndex = 5;
+  bool isSynced = 6;
+  uint64 virtualDaaScore = 7;
+  RPCError error = 1000;
+}
+
+message KaspadRequest {
+  uint64 id = 101;
+  oneof payload {
+    GetBalanceByAddressRequestMessage getBalanceByAddressRequest = 1077;
+    GetServerInfoRequestMessage getServerInfoRequest = 1092;
+  }
+}
+
+message KaspadResponse {
+  uint64 id = 101;
+  oneof payload {
+    GetBalanceByAddressResponseMessage getBalanceByAddressResponse = 1078;
+    GetServerInfoResponseMessage getServerInfoResponse = 1093;
+  }
+}
+
+service RPC {
+  rpc MessageStream(stream KaspadRequest) returns (stream KaspadResponse) {}
+}
