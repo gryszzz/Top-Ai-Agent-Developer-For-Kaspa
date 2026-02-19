@@ -50,6 +50,11 @@ Compatibility metadata:
 
 - [`manifest.json`](skills/public/kaspa-sovereign-architect-engine/manifest.json)
 
+Automated verification:
+
+- [Compatibility Matrix workflow](https://github.com/gryszzz/Top-Ai-Agent-Developer-For-Kaspa/actions/workflows/compatibility-matrix.yml)
+- Release gating validation is enforced in [`.github/workflows/release-skill.yml`](.github/workflows/release-skill.yml)
+
 ## 🛠 Install
 
 ### Option A: Install latest release (recommended)

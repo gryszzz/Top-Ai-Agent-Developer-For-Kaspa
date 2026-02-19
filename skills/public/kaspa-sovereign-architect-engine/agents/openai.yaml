@@ -1,6 +1,6 @@
 interface:
   display_name: "Kaspa Sovereign Architect"
   short_description: "Sovereign Kaspa architecture, reliability, and innovation"
-  icon_small: "./assets/forge-os-logo.png"
-  icon_large: "./assets/forge-os-logo.png"
+  icon_small: "../assets/forge-os-logo.png"
+  icon_large: "../assets/forge-os-logo.png"
   default_prompt: "Use $kaspa-sovereign-architect-engine in God-Mode strategist-and-builder flow with first-principles Kaspa reasoning, chaos recovery validation, knowledge-graph learning, and ecosystem strategy optimization."

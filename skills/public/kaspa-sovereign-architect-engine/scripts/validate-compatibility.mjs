@@ -3,8 +3,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
-const rootDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const scriptPath = fileURLToPath(import.meta.url);
+const rootDir = path.resolve(path.dirname(scriptPath), "..");
 const manifestPath = path.join(rootDir, "manifest.json");
 const openaiPath = path.join(rootDir, "agents", "openai.yaml");
 const logoPath = path.join(rootDir, "assets", "forge-os-logo.png");

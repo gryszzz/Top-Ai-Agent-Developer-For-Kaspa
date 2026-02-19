@@ -1,0 +1,57 @@
+name: Compatibility Matrix
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "skills/public/kaspa-sovereign-architect-engine/**"
+      - ".github/workflows/compatibility-matrix.yml"
+  pull_request:
+    paths:
+      - "skills/public/kaspa-sovereign-architect-engine/**"
+      - ".github/workflows/compatibility-matrix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-validation:
+    name: Full Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run compatibility validator (all targets)
+        run: node skills/public/kaspa-sovereign-architect-engine/scripts/validate-compatibility.mjs --all
+
+  target-matrix:
+    name: Target ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - codex
+          - openai
+          - anthropic
+          - cursor
+          - generic
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate target
+        run: node skills/public/kaspa-sovereign-architect-engine/scripts/validate-compatibility.mjs --target ${{ matrix.target }}

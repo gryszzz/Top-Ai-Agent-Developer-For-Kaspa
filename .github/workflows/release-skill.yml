@@ -16,6 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate compatibility (release gate)
+        run: node skills/public/kaspa-sovereign-architect-engine/scripts/validate-compatibility.mjs --all
+
       - name: Package skill
         run: |
           cd skills/public
