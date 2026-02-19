@@ -26,6 +26,7 @@ Use this checklist per repository and quote concrete file paths and symbols.
 - Map JSON-RPC, gRPC, websocket, or custom protocol usage.
 - Identify retry behavior, timeout policy, and reconnection behavior.
 - Identify indexing assumptions and mempool consistency assumptions.
+- Identify subscription semantics and replay or gap-handling behavior for stream consumers.
 
 ## 5. Security Review
 
@@ -34,6 +35,7 @@ Use this checklist per repository and quote concrete file paths and symbols.
 - Identify dependency and supply-chain risk points.
 - Identify wallet phishing, malicious extension, and signing-prompt confusion risks.
 - Identify race conditions around UTXO selection and double-spend handling.
+- Identify extension or provider-injection risk when browser wallets are in scope.
 
 ## 6. Improvement and Reuse
 
@@ -45,6 +47,7 @@ Use this checklist per repository and quote concrete file paths and symbols.
   - Event-sourced balance tracking
   - Circuit-breaker rollback strategy
 - Describe fork and extension path: where to add features safely.
+- Include operational controls: rate limiting, circuit breakers, and abuse detection.
 
 ## 7. Output Requirements
 
