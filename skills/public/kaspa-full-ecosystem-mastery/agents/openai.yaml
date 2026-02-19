@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaspa Ecosystem Mastery"
+  short_description: "Deep Kaspa protocol, wallet, and DeFi system design"
+  default_prompt: "Use $kaspa-full-ecosystem-mastery to produce a code-path-level Kaspa ecosystem analysis and production architecture plan."
