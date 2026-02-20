@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import { verify } from "@noble/secp256k1";
+import { verifyAsync } from "@noble/secp256k1";
 import { z } from "zod";
 import { trackBusinessEvent } from "../analytics/events";
 import { env } from "../config/env";
@@ -47,10 +47,20 @@ async function verifyMessageSignature(
   signatureHex: string,
   publicKeyHex: string
 ): Promise<boolean> {
-  const digest = crypto.createHash("sha256").update(message, "utf8").digest();
+  const messageBytes = Buffer.from(message, "utf8");
+  const digest = crypto.createHash("sha256").update(messageBytes).digest();
 
   try {
-    return await verify(hexToBytes(signatureHex), digest, hexToBytes(publicKeyHex));
+    const signatureBytes = hexToBytes(signatureHex);
+    const publicKeyBytes = hexToBytes(publicKeyHex);
+
+    // Wallet providers differ on whether they sign the raw challenge message or a pre-hashed digest.
+    const verifiedRaw = await verifyAsync(signatureBytes, messageBytes, publicKeyBytes);
+    if (verifiedRaw) {
+      return true;
+    }
+
+    return await verifyAsync(signatureBytes, digest, publicKeyBytes, { prehash: false });
   } catch {
     return false;
   }
