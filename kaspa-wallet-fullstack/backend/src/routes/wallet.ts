@@ -7,6 +7,7 @@ import { trackBusinessEvent } from "../analytics/events";
 import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
 import { HttpError } from "../middleware/errorHandler";
+import { createIdempotencyMiddleware } from "../middleware/idempotency";
 
 type WalletType =
   | "kasware"
@@ -25,6 +26,7 @@ type Challenge = {
 };
 
 const challenges = new Map<string, Challenge>();
+const idempotentWalletSession = createIdempotencyMiddleware("wallet_session");
 
 const ChallengeInputSchema = z.object({
   address: z.string().trim().min(1),
@@ -111,7 +113,7 @@ export function createWalletRouter(): Router {
     }
   });
 
-  router.post("/session", async (req, res, next) => {
+  router.post("/session", idempotentWalletSession, async (req, res, next) => {
     try {
       const input = SessionInputSchema.parse(req.body);
       const challenge = challenges.get(input.nonce);

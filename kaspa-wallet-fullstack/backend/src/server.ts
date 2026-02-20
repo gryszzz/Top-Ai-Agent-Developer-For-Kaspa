@@ -16,7 +16,8 @@ server.listen(env.PORT, () => {
       port: env.PORT,
       nodeEnv: env.NODE_ENV,
       network: env.KASPA_NETWORK,
-      kaspaRpcTarget: env.KASPA_RPC_TARGET,
+      kaspaRpcTargets: env.KASPA_RPC_TARGETS,
+      kaspaRpcMaxAttempts: env.KASPA_RPC_MAX_ATTEMPTS,
       rateLimitWindowMs: env.RATE_LIMIT_WINDOW_MS,
       rateLimitMax: env.RATE_LIMIT_MAX
     },

@@ -54,10 +54,18 @@ const EnvSchema = z.object({
 
   RATE_LIMIT_WINDOW_MS: intFromEnv(60_000).pipe(z.number().int().min(1000)),
   RATE_LIMIT_MAX: intFromEnv(120).pipe(z.number().int().min(1)),
+  RATE_LIMIT_AUTH_MAX: intFromEnv(40).pipe(z.number().int().min(1)),
+  RATE_LIMIT_AGENT_MAX: intFromEnv(80).pipe(z.number().int().min(1)),
+  RATE_LIMIT_STATS_MAX: intFromEnv(240).pipe(z.number().int().min(1)),
   REDIS_URL: z.string().optional(),
 
   KASPA_RPC_TARGET: z.string().min(3).default("127.0.0.1:16210"),
+  KASPA_RPC_TARGETS: z.string().optional(),
   KASPA_RPC_TIMEOUT_MS: intFromEnv(5_000).pipe(z.number().int().min(500).max(60_000)),
+  KASPA_RPC_MAX_ATTEMPTS: intFromEnv(3).pipe(z.number().int().min(1).max(10)),
+  KASPA_RPC_CIRCUIT_BREAKER_FAILURE_THRESHOLD: intFromEnv(3).pipe(z.number().int().min(1).max(20)),
+  KASPA_RPC_CIRCUIT_BREAKER_COOLDOWN_MS: intFromEnv(15_000).pipe(z.number().int().min(1000).max(300_000)),
+  BALANCE_CACHE_TTL_SECONDS: intFromEnv(5).pipe(z.number().int().min(0).max(600)),
   KASPA_RPC_USE_TLS: boolFromEnv,
   KASPA_RPC_CA_CERT_PATH: z.string().optional(),
   KASPA_ALLOWED_ADDRESS_PREFIXES: z.string().default("kaspatest,kaspa"),
@@ -68,6 +76,7 @@ const EnvSchema = z.object({
   JWT_SECRET: z.string().min(8).default("change-me-in-production"),
   SESSION_TTL_SECONDS: intFromEnv(3600).pipe(z.number().int().min(60).max(86400 * 30)),
   CHALLENGE_TTL_SECONDS: intFromEnv(300).pipe(z.number().int().min(30).max(3600)),
+  IDEMPOTENCY_TTL_SECONDS: intFromEnv(3600).pipe(z.number().int().min(30).max(86400)),
   ALLOW_UNVERIFIED_WALLET_SIG: boolFromEnv,
   KASPIUM_URI_SCHEME: z.string().default("kaspa"),
 
@@ -122,8 +131,16 @@ const strictPrefixes =
     : allowedPrefixes;
 const effectivePrefixes = strictPrefixes.length > 0 ? strictPrefixes : allowedPrefixes;
 
+const rpcTargets = (envValues.KASPA_RPC_TARGETS || envValues.KASPA_RPC_TARGET)
+  .split(",")
+  .map((target) => target.trim())
+  .filter(Boolean);
+
+const uniqueRpcTargets = [...new Set(rpcTargets)];
+
 export const env = {
   ...envValues,
+  KASPA_RPC_TARGETS: uniqueRpcTargets,
   KASPA_ALLOWED_ADDRESS_PREFIXES: allowedPrefixes,
   KASPA_EFFECTIVE_ADDRESS_PREFIXES: effectivePrefixes,
   KASPA_RPC_CA_CERT_PATH: envValues.KASPA_RPC_CA_CERT_PATH

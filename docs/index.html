@@ -175,7 +175,7 @@
               <span class="badge">Codex Native</span>
               <span class="badge">OpenAI + Claude + Cursor + Gemini</span>
               <span class="badge">OpenClaw Adapter Included</span>
-              <span class="badge">Runtime v1.4.0</span>
+              <span class="badge">Runtime v1.5.0</span>
             </div>
           </div>
         </div>
@@ -207,7 +207,8 @@ Design a Kaspa DAG-aware indexer with replay-safe workers and SRE-grade failure 
           <h2>Runtime Upgrade</h2>
           <p>
             ForgeOS now includes wallet-scoped runtime control APIs, realtime node/DAA telemetry, strict network-prefix
-            enforcement, and Redis-backed distributed runtime mode for sticky-free multi-instance deployments.
+            enforcement, Redis-backed distributed runtime mode for sticky-free multi-instance deployments, multi-node RPC
+            failover, idempotent write APIs, and SSE stats streaming with polling fallback.
           </p>
         </article>
 
@@ -242,7 +243,8 @@ unzip -o /tmp/kaspa-sovereign-architect-engine.zip -d "$CODEX_HOME/skills"</div>
           <h3>Production Notes</h3>
           <p>
             Domain is live on GitHub Pages. For full wallet execution from this domain, deploy the backend API publicly
-            and set frontend <code>VITE_API_BASE_URL</code> to that endpoint.
+            and set frontend <code>VITE_API_BASE_URL</code> to that endpoint. The fullstack runtime in this repo ships
+            with strict signature auth, wallet-scoped runtime locks, and Kaspa network-prefix guardrails.
           </p>
         </article>
       </section>

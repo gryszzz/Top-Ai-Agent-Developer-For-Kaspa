@@ -7,6 +7,7 @@ import {
   fetchBalance,
   fetchNetwork,
   fetchRealtimeStats,
+  openRealtimeStatsStream,
   startAgentRuntime,
   stopAgentRuntime,
   type AgentRuntimeState,
@@ -284,6 +285,7 @@ export default function App() {
   const [agentMode, setAgentMode] = useState<"observe" | "accumulate">(DEFAULT_AGENT_PREFERENCE.mode);
   const [agentIntervalSeconds, setAgentIntervalSeconds] = useState<number>(DEFAULT_AGENT_PREFERENCE.intervalSeconds);
   const [agentAutoResume, setAgentAutoResume] = useState<boolean>(DEFAULT_AGENT_PREFERENCE.autoResume);
+  const [statsStreamLive, setStatsStreamLive] = useState(false);
   const [kaswareReady, setKaswareReady] = useState(hasKaswareProvider());
   const [kaswareChecking, setKaswareChecking] = useState(!hasKaswareProvider());
   const [kastleReady, setKastleReady] = useState(hasKastleProvider());
@@ -330,18 +332,28 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
+    let streamErrorReported = false;
 
-    const poll = () => {
+    const applyStats = (stats: RealtimeStatsResponse) => {
+      if (cancelled) {
+        return;
+      }
+
+      setRealtimeStats(stats);
+      if (address) {
+        const runtime = stats.agents.states.find(
+          (candidate) => candidate.address.trim().toLowerCase() === address.trim().toLowerCase()
+        );
+        setAgentRuntime(runtime ?? null);
+      }
+    };
+
+    const poll = (fromFallback = false) => {
       void fetchRealtimeStats()
         .then((stats) => {
-          if (!cancelled) {
-            setRealtimeStats(stats);
-            if (address) {
-              const runtime = stats.agents.states.find(
-                (candidate) => candidate.address.trim().toLowerCase() === address.trim().toLowerCase()
-              );
-              setAgentRuntime(runtime ?? null);
-            }
+          applyStats(stats);
+          if (fromFallback && !cancelled) {
+            setStatsStreamLive(false);
           }
         })
         .catch((err: Error) => {
@@ -352,10 +364,28 @@ export default function App() {
     };
 
     poll();
-    const timer = window.setInterval(poll, 5000);
+    let closeStream = () => {};
+    if (typeof window !== "undefined" && typeof window.EventSource !== "undefined") {
+      closeStream = openRealtimeStatsStream({
+        onSnapshot: (snapshot) => {
+          setStatsStreamLive(true);
+          applyStats(snapshot);
+        },
+        onError: (message) => {
+          if (!streamErrorReported && !cancelled) {
+            streamErrorReported = true;
+            setError(`stats stream degraded: ${message}`);
+          }
+          setStatsStreamLive(false);
+        }
+      });
+    }
+
+    const timer = window.setInterval(() => poll(true), 15_000);
 
     return () => {
       cancelled = true;
+      closeStream();
       window.clearInterval(timer);
     };
   }, [address, setError]);
@@ -878,8 +908,55 @@ export default function App() {
           <span className="rounded bg-slate-800 px-2 py-1">
             runtime store: {networkInfo?.runtime?.store ?? "memory"}
           </span>
+          <span className="rounded bg-slate-800 px-2 py-1">stats stream: {statsStreamLive ? "live" : "polling"}</span>
+          <span className="rounded bg-slate-800 px-2 py-1">
+            rpc endpoints: {realtimeStats?.rpcPool?.length ?? 0}
+          </span>
+          <span className="rounded bg-slate-800 px-2 py-1">
+            rpc degraded:{" "}
+            {realtimeStats?.rpcPool?.filter((endpoint) => endpoint.circuitOpenUntil || endpoint.consecutiveFailures > 0)
+              .length ?? 0}
+          </span>
         </div>
       </header>
+
+      <section className="mb-5 rounded-2xl border border-slate-700 bg-slate-900/60 p-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">RPC Pool Health</h2>
+        {realtimeStats?.rpcPool && realtimeStats.rpcPool.length > 0 ? (
+          <div className="mt-3 overflow-x-auto">
+            <table className="min-w-full text-left text-xs">
+              <thead>
+                <tr className="text-slate-400">
+                  <th className="pb-2 pr-3">target</th>
+                  <th className="pb-2 pr-3">score</th>
+                  <th className="pb-2 pr-3">inflight</th>
+                  <th className="pb-2 pr-3">failures</th>
+                  <th className="pb-2 pr-3">state</th>
+                </tr>
+              </thead>
+              <tbody>
+                {realtimeStats.rpcPool.map((endpoint) => (
+                  <tr key={endpoint.target} className="border-t border-slate-800 text-slate-200">
+                    <td className="py-2 pr-3">{endpoint.target}</td>
+                    <td className="py-2 pr-3">{endpoint.score}</td>
+                    <td className="py-2 pr-3">{endpoint.inflight}</td>
+                    <td className="py-2 pr-3">{endpoint.consecutiveFailures}</td>
+                    <td className="py-2 pr-3">
+                      {endpoint.circuitOpenUntil ? (
+                        <span className="rounded bg-amber-500/20 px-2 py-1 text-amber-200">circuit-open</span>
+                      ) : (
+                        <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-200">healthy</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="mt-2 text-xs text-slate-400">RPC health metrics will appear after first stats snapshot.</p>
+        )}
+      </section>
 
       <section className="grid gap-5 md:grid-cols-2">
         <article className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5">

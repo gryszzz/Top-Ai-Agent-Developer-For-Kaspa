@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
+import { getBalanceCacheStore } from "../kaspa/balanceCache";
 import { KaspaRpcClient } from "../kaspa/kaspaRpcClient";
 import { sompiToKasString } from "../kaspa/units";
 import { HttpError } from "../middleware/errorHandler";
@@ -12,6 +13,7 @@ const ParamsSchema = z.object({
 
 export function createBalanceRouter(kaspaClient: KaspaRpcClient): Router {
   const router = Router();
+  const balanceCache = getBalanceCacheStore();
 
   router.get("/:address", async (req, res, next) => {
     try {
@@ -22,13 +24,25 @@ export function createBalanceRouter(kaspaClient: KaspaRpcClient): Router {
         throw new HttpError(400, "Invalid Kaspa address", { reason: validation.reason });
       }
 
-      const balanceSompi = await kaspaClient.getBalanceByAddress(address);
+      const cachedBalance = await balanceCache.get(address);
+      const balanceSompi =
+        cachedBalance && env.BALANCE_CACHE_TTL_SECONDS > 0
+          ? BigInt(cachedBalance.balanceSompi)
+          : await kaspaClient.getBalanceByAddress(address);
+
+      if (!cachedBalance && env.BALANCE_CACHE_TTL_SECONDS > 0) {
+        await balanceCache.set(address, {
+          balanceSompi: balanceSompi.toString(),
+          cachedAt: new Date().toISOString()
+        });
+      }
 
       res.status(200).json({
         address,
         network: env.KASPA_NETWORK,
         balanceSompi: balanceSompi.toString(),
         balanceKas: sompiToKasString(balanceSompi),
+        cached: Boolean(cachedBalance),
         networkPrefixesAllowed: env.KASPA_EFFECTIVE_ADDRESS_PREFIXES,
         timestamp: new Date().toISOString()
       });

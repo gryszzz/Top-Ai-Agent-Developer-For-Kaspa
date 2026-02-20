@@ -8,6 +8,12 @@ export function createNetworkRouter(): Router {
     res.status(200).json({
       network: env.KASPA_NETWORK,
       rpcTarget: env.KASPA_RPC_TARGET,
+      rpcTargets: env.KASPA_RPC_TARGETS,
+      rpcFailover: {
+        maxAttempts: env.KASPA_RPC_MAX_ATTEMPTS,
+        circuitBreakerFailureThreshold: env.KASPA_RPC_CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+        circuitBreakerCooldownMs: env.KASPA_RPC_CIRCUIT_BREAKER_COOLDOWN_MS
+      },
       allowedAddressPrefixes: env.KASPA_ALLOWED_ADDRESS_PREFIXES,
       effectiveAddressPrefixes: env.KASPA_EFFECTIVE_ADDRESS_PREFIXES,
       wallets: {
@@ -55,6 +61,9 @@ export function createNetworkRouter(): Router {
       runtime: {
         store: env.REDIS_URL ? "redis" : "memory",
         distributed: Boolean(env.REDIS_URL)
+      },
+      caching: {
+        balanceCacheTtlSeconds: env.BALANCE_CACHE_TTL_SECONDS
       },
       timestamp: new Date().toISOString()
     });

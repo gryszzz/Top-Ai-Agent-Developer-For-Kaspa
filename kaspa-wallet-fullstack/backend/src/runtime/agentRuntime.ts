@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
 import Redis from "ioredis";
+import { Counter, Histogram } from "prom-client";
 import { env } from "../config/env";
 import type { KaspaRpcClient } from "../kaspa/kaspaRpcClient";
 import { sompiToKasString } from "../kaspa/units";
 import { logger } from "../logging/logger";
+import { metricsRegistry } from "../middleware/metrics";
 
 export type AgentMode = "observe" | "accumulate";
 
@@ -42,6 +44,73 @@ export type WalletAgentRuntimeService = {
 const MIN_INTERVAL_SECONDS = 5;
 const MAX_INTERVAL_SECONDS = 300;
 const RECONCILE_INTERVAL_MS = 5_000;
+
+const runtimeLockContentionTotal = new Counter({
+  name: "agent_runtime_lock_contention_total",
+  help: "Total lock contention events while ticking distributed wallet runtimes",
+  labelNames: ["network"] as const,
+  registers: [metricsRegistry]
+});
+
+const runtimeTickDurationSeconds = new Histogram({
+  name: "agent_runtime_tick_duration_seconds",
+  help: "Duration of runtime tick execution",
+  labelNames: ["network", "result"] as const,
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+  registers: [metricsRegistry]
+});
+
+const runtimeTickLagSeconds = new Histogram({
+  name: "agent_runtime_tick_lag_seconds",
+  help: "Lag between expected and actual runtime tick time",
+  labelNames: ["network"] as const,
+  buckets: [0.1, 0.25, 0.5, 1, 2, 5, 10, 30],
+  registers: [metricsRegistry]
+});
+
+class AsyncTaskQueue {
+  private readonly pending: Array<() => Promise<void>> = [];
+
+  private running = 0;
+
+  constructor(private readonly maxConcurrency: number) {}
+
+  async enqueue(task: () => Promise<void>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const wrapped = async () => {
+        this.running += 1;
+        try {
+          await task();
+          resolve();
+        } catch (error) {
+          reject(error);
+        } finally {
+          this.running = Math.max(0, this.running - 1);
+          this.drain();
+        }
+      };
+
+      this.pending.push(wrapped);
+      this.drain();
+    });
+  }
+
+  private drain(): void {
+    while (this.running < this.maxConcurrency && this.pending.length > 0) {
+      const next = this.pending.shift();
+      if (!next) {
+        return;
+      }
+      void next();
+    }
+  }
+}
+
+function walletShardKey(address: string): string {
+  const normalized = normalizeAddress(address);
+  const hash = crypto.createHash("sha256").update(normalized).digest("hex");
+  return `${hash.slice(0, 2)}:${hash.slice(0, 24)}`;
+}
 
 function normalizeIntervalSeconds(value: number): number {
   if (!Number.isFinite(value)) {
@@ -185,6 +254,8 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
 
   private readonly reconcileTimer: NodeJS.Timeout;
 
+  private readonly tickQueue = new AsyncTaskQueue(8);
+
   constructor(
     private readonly kaspaClient: KaspaRpcClient,
     private readonly redis: Redis,
@@ -197,7 +268,8 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
   }
 
   async get(address: string): Promise<AgentRuntimeState | null> {
-    const raw = await this.redis.get(this.stateKey(address));
+    const shard = walletShardKey(address);
+    const raw = await this.redis.get(this.stateKeyForShard(shard));
     if (!raw) {
       return null;
     }
@@ -205,12 +277,12 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
   }
 
   async list(): Promise<AgentRuntimeState[]> {
-    const addresses = await this.redis.smembers(this.knownSetKey());
-    if (addresses.length === 0) {
+    const shards = await this.redis.smembers(this.knownSetKey());
+    if (shards.length === 0) {
       return [];
     }
 
-    const keys = addresses.map((address) => this.stateKey(address));
+    const keys = shards.map((shard) => this.stateKeyForShard(shard));
     const values = await this.redis.mget(keys);
 
     const states: AgentRuntimeState[] = [];
@@ -249,16 +321,16 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
       updatedAt: nowIso
     };
 
-    const normalized = normalizeAddress(input.address);
+    const shard = walletShardKey(input.address);
     await this.redis
       .multi()
-      .set(this.stateKey(normalized), JSON.stringify(next))
-      .sadd(this.knownSetKey(), normalized)
-      .sadd(this.runningSetKey(), normalized)
+      .set(this.stateKeyForShard(shard), JSON.stringify(next))
+      .sadd(this.knownSetKey(), shard)
+      .sadd(this.runningSetKey(), shard)
       .exec();
 
-    await this.tickWallet(normalized);
-    const state = await this.get(normalized);
+    await this.tickQueue.enqueue(() => this.tickWallet(shard));
+    const state = await this.get(next.address);
     return state ?? next;
   }
 
@@ -268,7 +340,7 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
       return null;
     }
 
-    const normalized = normalizeAddress(address);
+    const shard = walletShardKey(address);
     const next: AgentRuntimeState = {
       ...current,
       running: false,
@@ -277,8 +349,8 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
 
     await this.redis
       .multi()
-      .set(this.stateKey(normalized), JSON.stringify(next))
-      .srem(this.runningSetKey(), normalized)
+      .set(this.stateKeyForShard(shard), JSON.stringify(next))
+      .srem(this.runningSetKey(), shard)
       .exec();
 
     return next;
@@ -289,8 +361,8 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
     await this.redis.quit().catch(() => undefined);
   }
 
-  private stateKey(address: string): string {
-    return `forgeos:agent:state:${this.network}:${normalizeAddress(address)}`;
+  private stateKeyForShard(shard: string): string {
+    return `forgeos:agent:state:${this.network}:${shard}`;
   }
 
   private knownSetKey(): string {
@@ -301,8 +373,8 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
     return `forgeos:agent:running:${this.network}`;
   }
 
-  private lockKey(address: string): string {
-    return `forgeos:agent:lock:${this.network}:${normalizeAddress(address)}`;
+  private lockKeyForShard(shard: string): string {
+    return `forgeos:agent:lock:${this.network}:${shard}`;
   }
 
   private parseState(raw: string): AgentRuntimeState | null {
@@ -319,29 +391,31 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
 
   private async reconcile(): Promise<void> {
     try {
-      const running = await this.redis.smembers(this.runningSetKey());
-      if (running.length === 0) {
+      const runningShards = await this.redis.smembers(this.runningSetKey());
+      if (runningShards.length === 0) {
         return;
       }
 
-      await Promise.all(running.map((address) => this.tickWallet(address)));
+      await Promise.all(runningShards.map((shard) => this.tickQueue.enqueue(() => this.tickWallet(shard))));
     } catch (error) {
       logger.warn({ err: error }, "Redis runtime reconcile failed");
     }
   }
 
-  private async tickWallet(address: string): Promise<void> {
-    const normalized = normalizeAddress(address);
-    const lockKey = this.lockKey(normalized);
+  private async tickWallet(shard: string): Promise<void> {
+    const lockKey = this.lockKeyForShard(shard);
     const token = `${this.instanceId}:${crypto.randomUUID()}`;
 
     const locked = await this.redis.set(lockKey, token, "PX", 30_000, "NX");
     if (locked !== "OK") {
+      runtimeLockContentionTotal.inc({ network: this.network });
       return;
     }
 
+    const tickStartedAt = process.hrtime.bigint();
+
     try {
-      const raw = await this.redis.get(this.stateKey(normalized));
+      const raw = await this.redis.get(this.stateKeyForShard(shard));
       if (!raw) {
         return;
       }
@@ -350,6 +424,9 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
       if (!current || !current.running) {
         return;
       }
+
+      const lagSeconds = this.computeTickLagSeconds(current);
+      runtimeTickLagSeconds.observe({ network: this.network }, lagSeconds);
 
       const [balanceSompi, serverInfo] = await Promise.all([
         this.kaspaClient.getBalanceByAddress(current.address),
@@ -368,9 +445,13 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
         updatedAt: new Date().toISOString()
       };
 
-      await this.redis.set(this.stateKey(normalized), JSON.stringify(updated));
+      await this.redis.set(this.stateKeyForShard(shard), JSON.stringify(updated));
+      runtimeTickDurationSeconds.observe(
+        { network: this.network, result: "ok" },
+        Number(process.hrtime.bigint() - tickStartedAt) / 1_000_000_000
+      );
     } catch (error) {
-      const raw = await this.redis.get(this.stateKey(normalized));
+      const raw = await this.redis.get(this.stateKeyForShard(shard));
       const current = raw ? this.parseState(raw) : null;
       if (!current) {
         return;
@@ -381,10 +462,29 @@ class RedisWalletAgentRuntimeService implements WalletAgentRuntimeService {
         lastError: error instanceof Error ? error.message : "Agent tick failed",
         updatedAt: new Date().toISOString()
       };
-      await this.redis.set(this.stateKey(normalized), JSON.stringify(updated));
+      await this.redis.set(this.stateKeyForShard(shard), JSON.stringify(updated));
+      runtimeTickDurationSeconds.observe(
+        { network: this.network, result: "error" },
+        Number(process.hrtime.bigint() - tickStartedAt) / 1_000_000_000
+      );
     } finally {
       await this.releaseLock(lockKey, token);
     }
+  }
+
+  private computeTickLagSeconds(state: AgentRuntimeState): number {
+    const reference = state.lastTickAt || state.startedAt;
+    if (!reference) {
+      return 0;
+    }
+
+    const referenceMs = Date.parse(reference);
+    if (!Number.isFinite(referenceMs)) {
+      return 0;
+    }
+
+    const expectedNextTickMs = referenceMs + state.intervalSeconds * 1000;
+    return Math.max(0, (Date.now() - expectedNextTickMs) / 1000);
   }
 
   private async releaseLock(lockKey: string, token: string): Promise<void> {

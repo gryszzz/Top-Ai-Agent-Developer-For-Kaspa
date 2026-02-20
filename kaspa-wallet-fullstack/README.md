@@ -10,6 +10,12 @@ Production-style fullstack starter with:
 - Wallet compatibility slots for KNG web/mobile, Ledger + KASVault, and CLI wallets (address-backed session mode)
 - Wallet-scoped runtime agent control with reconnect auto-resume preferences
 - Live node/BlockDAG telemetry from Kaspa RPC (`virtualDaaScore`, sync state, runtime counts)
+- Multi-node Kaspa RPC pool with scoring, retry, and per-endpoint circuit breakers
+- Redis-backed distributed runtime + wallet-scoped locking for sticky-free API scaling
+- Redis/in-memory idempotency middleware for wallet session, agent start/stop, and payment quote writes
+- SSE realtime stats stream with polling fallback and RPC pool health surface in UI
+- Balance response caching layer (Redis or memory fallback)
+- Tiered rate limiting (default + auth + agent + stats classes)
 - Docker Compose for one-command local boot
 
 ## Implemented API
@@ -17,6 +23,7 @@ Production-style fullstack starter with:
 - `GET /healthz`, `GET /readyz`, `GET /metrics`
 - `GET /v1/network`
 - `GET /v1/stats/realtime`
+- `GET /v1/stats/stream` (SSE)
 - `GET /v1/balance/:address`
 - `POST /v1/wallet/challenge`
 - `POST /v1/wallet/session`
@@ -40,6 +47,10 @@ Backend: `http://localhost:8080`
 Core:
 
 - `KASPA_RPC_TARGET` - Kaspa gRPC endpoint (`host:port`)
+- `KASPA_RPC_TARGETS` - comma-separated Kaspa gRPC endpoints for failover pool (preferred in production)
+- `KASPA_RPC_MAX_ATTEMPTS` - max endpoint attempts per request
+- `KASPA_RPC_CIRCUIT_BREAKER_FAILURE_THRESHOLD` - open circuit after N failures
+- `KASPA_RPC_CIRCUIT_BREAKER_COOLDOWN_MS` - circuit cooldown duration
 - `KASPA_NETWORK` - example: `testnet-10`
 - `KASPA_ALLOWED_ADDRESS_PREFIXES` - allowed prefixes for this deployment
 - `ALLOW_UNVERIFIED_WALLET_SIG` - set `false` for strict verification
@@ -48,6 +59,11 @@ Core:
   - mainnet: `kaspa`
 - Backend enforces an effective prefix set derived from `KASPA_NETWORK` to prevent cross-network address mistakes.
 - `REDIS_URL` enables distributed runtime (multi-instance, sticky-free); without it runtime falls back to single-instance memory.
+- `IDEMPOTENCY_TTL_SECONDS` - retention for idempotency key records
+- `BALANCE_CACHE_TTL_SECONDS` - balance cache TTL
+- `RATE_LIMIT_AUTH_MAX` - stricter auth/session endpoint budget
+- `RATE_LIMIT_AGENT_MAX` - runtime control endpoint budget
+- `RATE_LIMIT_STATS_MAX` - stats endpoint budget
 
 Monetization:
 
@@ -55,6 +71,27 @@ Monetization:
 - `PLATFORM_FEE_BPS` - fee in basis points (100 = 1%)
 - `PLATFORM_FEE_MIN_KAS` - minimum fee in KAS
 - `PLATFORM_FEE_RECIPIENT` - fee recipient address
+
+## Idempotency and retries
+
+Write endpoints support `idempotency-key` headers:
+
+- `POST /v1/wallet/session`
+- `POST /v1/agent/start`
+- `POST /v1/agent/stop`
+- `POST /v1/payments/quote`
+
+Behavior:
+
+- same key + same payload -> response replayed
+- same key + different payload -> `409` conflict
+- in-flight duplicate requests are rejected until first request finalizes
+
+## Realtime transport
+
+- UI subscribes to `GET /v1/stats/stream` (SSE) for live runtime/node metrics
+- Automatic fallback to `GET /v1/stats/realtime` polling when stream degrades
+- RPC endpoint health and circuit state are exposed in realtime snapshots
 
 ## Local dev (without Docker)
 
@@ -124,6 +161,7 @@ npm test
   - `payment_intent_created`
   - `agent_started`
   - `agent_stopped`
+  - runtime lock contention and tick timing metrics for distributed runtime visibility
 
 ## Troubleshooting
 
@@ -138,3 +176,5 @@ npm test
 - Agent runtime endpoints require `Authorization: Bearer <wallet-session-token>`.
 - If node telemetry is blank, verify backend can reach `KASPA_RPC_TARGET` and node is synced on expected network.
 - If `runtime store` shows `memory`, set `REDIS_URL` so runtime state is shared across instances.
+- If RPC pool shows degraded/open circuits, verify all `KASPA_RPC_TARGETS` are reachable and on the same network.
+- If duplicate requests conflict unexpectedly, verify your client reuses the same `idempotency-key` only for the same payload.

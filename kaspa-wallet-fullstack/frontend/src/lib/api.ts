@@ -144,6 +144,18 @@ export type RealtimeStatsResponse = {
     running: number;
     states: AgentRuntimeState[];
   };
+  rpcPool?: Array<{
+    target: string;
+    score: number;
+    inflight: number;
+    consecutiveFailures: number;
+    consecutiveSuccesses: number;
+    totalRequests: number;
+    circuitOpenUntil?: string;
+    lastError?: string;
+    lastFailureAt?: string;
+    lastSuccessAt?: string;
+  }>;
   error?: string;
   timestamp: string;
 };
@@ -166,6 +178,16 @@ async function jsonRequest<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+function buildDeterministicIdempotencyKey(prefix: string, parts: Array<string | number | undefined>): string {
+  const sanitized = parts
+    .map((value) => String(value ?? "").trim().toLowerCase())
+    .filter(Boolean)
+    .join(":")
+    .replace(/[^a-z0-9:_.-]/g, "");
+
+  return `${prefix}:${sanitized}`.slice(0, 128);
+}
+
 export function fetchNetwork(): Promise<NetworkResponse> {
   return jsonRequest<NetworkResponse>("/v1/network");
 }
@@ -186,8 +208,12 @@ export function createWalletSession(payload: {
   signature?: string;
   publicKey?: string;
 }) {
+  const idempotencyKey = buildDeterministicIdempotencyKey("wallet-session", [payload.nonce]);
   return jsonRequest<WalletSessionResponse>("/v1/wallet/session", {
     method: "POST",
+    headers: {
+      "idempotency-key": idempotencyKey
+    },
     body: JSON.stringify(payload)
   });
 }
@@ -199,14 +225,51 @@ export function createPaymentQuote(payload: {
   walletType: SessionWalletType;
   note?: string;
 }) {
+  const idempotencyKey = buildDeterministicIdempotencyKey("payment-quote", [
+    payload.walletType,
+    payload.fromAddress,
+    payload.toAddress,
+    payload.amountKas,
+    payload.note || ""
+  ]);
   return jsonRequest<PaymentQuoteResponse>("/v1/payments/quote", {
     method: "POST",
+    headers: {
+      "idempotency-key": idempotencyKey
+    },
     body: JSON.stringify(payload)
   });
 }
 
 export function fetchRealtimeStats(): Promise<RealtimeStatsResponse> {
   return jsonRequest<RealtimeStatsResponse>("/v1/stats/realtime");
+}
+
+export function openRealtimeStatsStream(handlers: {
+  onSnapshot: (value: RealtimeStatsResponse) => void;
+  onError?: (message: string) => void;
+}): () => void {
+  const source = new EventSource(`${API_BASE}/v1/stats/stream`);
+
+  source.addEventListener("snapshot", (event) => {
+    try {
+      const parsed = JSON.parse((event as MessageEvent).data) as RealtimeStatsResponse;
+      handlers.onSnapshot(parsed);
+    } catch (error) {
+      handlers.onError?.(error instanceof Error ? error.message : "Failed to parse stats stream event");
+    }
+  });
+
+  source.addEventListener("error", (event) => {
+    const payload = (event as MessageEvent)?.data;
+    if (payload) {
+      handlers.onError?.(payload);
+    }
+  });
+
+  return () => {
+    source.close();
+  };
 }
 
 export function fetchAgentState(address: string, sessionToken: string): Promise<AgentStateResponse> {
@@ -223,10 +286,16 @@ export function startAgentRuntime(payload: {
   intervalSeconds: number;
   sessionToken: string;
 }): Promise<AgentMutationResponse> {
+  const idempotencyKey = buildDeterministicIdempotencyKey("agent-start", [
+    payload.address,
+    payload.mode,
+    payload.intervalSeconds
+  ]);
   return jsonRequest<AgentMutationResponse>("/v1/agent/start", {
     method: "POST",
     headers: {
-      authorization: `Bearer ${payload.sessionToken}`
+      authorization: `Bearer ${payload.sessionToken}`,
+      "idempotency-key": idempotencyKey
     },
     body: JSON.stringify({
       address: payload.address,
@@ -237,10 +306,12 @@ export function startAgentRuntime(payload: {
 }
 
 export function stopAgentRuntime(payload: { address: string; sessionToken: string }): Promise<AgentMutationResponse> {
+  const idempotencyKey = buildDeterministicIdempotencyKey("agent-stop", [payload.address]);
   return jsonRequest<AgentMutationResponse>("/v1/agent/stop", {
     method: "POST",
     headers: {
-      authorization: `Bearer ${payload.sessionToken}`
+      authorization: `Bearer ${payload.sessionToken}`,
+      "idempotency-key": idempotencyKey
     },
     body: JSON.stringify({
       address: payload.address

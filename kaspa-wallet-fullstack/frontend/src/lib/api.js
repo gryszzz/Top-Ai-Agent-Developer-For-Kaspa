@@ -67,6 +67,14 @@ function jsonRequest(path, init) {
         });
     });
 }
+function buildDeterministicIdempotencyKey(prefix, parts) {
+    var sanitized = parts
+        .map(function (value) { return String(value !== null && value !== void 0 ? value : "").trim().toLowerCase(); })
+        .filter(Boolean)
+        .join(":")
+        .replace(/[^a-z0-9:_.-]/g, "");
+    return "".concat(prefix, ":").concat(sanitized).slice(0, 128);
+}
 export function fetchNetwork() {
     return jsonRequest("/v1/network");
 }
@@ -80,19 +88,56 @@ export function createWalletChallenge(address, walletType) {
     });
 }
 export function createWalletSession(payload) {
+    var idempotencyKey = buildDeterministicIdempotencyKey("wallet-session", [payload.nonce]);
     return jsonRequest("/v1/wallet/session", {
         method: "POST",
+        headers: {
+            "idempotency-key": idempotencyKey
+        },
         body: JSON.stringify(payload)
     });
 }
 export function createPaymentQuote(payload) {
+    var idempotencyKey = buildDeterministicIdempotencyKey("payment-quote", [
+        payload.walletType,
+        payload.fromAddress,
+        payload.toAddress,
+        payload.amountKas,
+        payload.note || ""
+    ]);
     return jsonRequest("/v1/payments/quote", {
         method: "POST",
+        headers: {
+            "idempotency-key": idempotencyKey
+        },
         body: JSON.stringify(payload)
     });
 }
 export function fetchRealtimeStats() {
     return jsonRequest("/v1/stats/realtime");
+}
+export function openRealtimeStatsStream(handlers) {
+    var source = new EventSource("".concat(API_BASE, "/v1/stats/stream"));
+    source.addEventListener("snapshot", function (event) {
+        var _a;
+        try {
+            var parsed = JSON.parse(event.data);
+            handlers.onSnapshot(parsed);
+        }
+        catch (error) {
+            (_a = handlers.onError) === null || _a === void 0 ? void 0 : _a.call(handlers, error instanceof Error ? error.message : "Failed to parse stats stream event");
+        }
+    });
+    source.addEventListener("error", function (event) {
+        var _a;
+        var payload = event === null || event === void 0 ? void 0 : event.data;
+        if (payload) {
+            (_a = handlers.onError) === null || _a === void 0 ? void 0 : _a.call(handlers, payload);
+        }
+    });
+    return function () {
+        source.close();
+    };
 }
 export function fetchAgentState(address, sessionToken) {
     return jsonRequest("/v1/agent/state/".concat(encodeURIComponent(address)), {
@@ -102,10 +147,16 @@ export function fetchAgentState(address, sessionToken) {
     });
 }
 export function startAgentRuntime(payload) {
+    var idempotencyKey = buildDeterministicIdempotencyKey("agent-start", [
+        payload.address,
+        payload.mode,
+        payload.intervalSeconds
+    ]);
     return jsonRequest("/v1/agent/start", {
         method: "POST",
         headers: {
-            authorization: "Bearer ".concat(payload.sessionToken)
+            authorization: "Bearer ".concat(payload.sessionToken),
+            "idempotency-key": idempotencyKey
         },
         body: JSON.stringify({
             address: payload.address,
@@ -115,10 +166,12 @@ export function startAgentRuntime(payload) {
     });
 }
 export function stopAgentRuntime(payload) {
+    var idempotencyKey = buildDeterministicIdempotencyKey("agent-stop", [payload.address]);
     return jsonRequest("/v1/agent/stop", {
         method: "POST",
         headers: {
-            authorization: "Bearer ".concat(payload.sessionToken)
+            authorization: "Bearer ".concat(payload.sessionToken),
+            "idempotency-key": idempotencyKey
         },
         body: JSON.stringify({
             address: payload.address

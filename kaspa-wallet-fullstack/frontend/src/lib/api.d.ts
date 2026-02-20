@@ -149,6 +149,18 @@ export type RealtimeStatsResponse = {
         running: number;
         states: AgentRuntimeState[];
     };
+    rpcPool?: Array<{
+        target: string;
+        score: number;
+        inflight: number;
+        consecutiveFailures: number;
+        consecutiveSuccesses: number;
+        totalRequests: number;
+        circuitOpenUntil?: string;
+        lastError?: string;
+        lastFailureAt?: string;
+        lastSuccessAt?: string;
+    }>;
     error?: string;
     timestamp: string;
 };
@@ -168,6 +180,10 @@ export declare function createPaymentQuote(payload: {
     note?: string;
 }): Promise<PaymentQuoteResponse>;
 export declare function fetchRealtimeStats(): Promise<RealtimeStatsResponse>;
+export declare function openRealtimeStatsStream(handlers: {
+    onSnapshot: (value: RealtimeStatsResponse) => void;
+    onError?: (message: string) => void;
+}): () => void;
 export declare function fetchAgentState(address: string, sessionToken: string): Promise<AgentStateResponse>;
 export declare function startAgentRuntime(payload: {
     address: string;

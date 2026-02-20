@@ -70,12 +70,13 @@ export function createApp(kaspaClient: KaspaRpcClient) {
   app.get("/", (_req, res) => {
     res.status(200).json({
       service: "kaspa-wallet-backend",
-      version: "1.4.0",
+      version: "1.5.0",
       endpoints: [
         "GET /healthz",
         "GET /readyz",
         "GET /v1/network",
         "GET /v1/stats/realtime",
+        "GET /v1/stats/stream",
         "GET /v1/balance/:address",
         "POST /v1/wallet/challenge",
         "POST /v1/wallet/session",

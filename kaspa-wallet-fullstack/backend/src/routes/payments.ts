@@ -4,6 +4,7 @@ import { trackBusinessEvent } from "../analytics/events";
 import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
 import { HttpError } from "../middleware/errorHandler";
+import { createIdempotencyMiddleware } from "../middleware/idempotency";
 import { quotePlatformFee } from "../monetization/platformFee";
 
 const PaymentQuoteInputSchema = z.object({
@@ -30,8 +31,9 @@ function buildKaspaUri(address: string, amountKas: string, note?: string): strin
 
 export function createPaymentsRouter(): Router {
   const router = Router();
+  const idempotentPaymentQuote = createIdempotencyMiddleware("payment_quote");
 
-  router.post("/quote", (req, res, next) => {
+  router.post("/quote", idempotentPaymentQuote, (req, res, next) => {
     try {
       const input = PaymentQuoteInputSchema.parse(req.body);
       const fromValidation = validateKaspaAddress(input.fromAddress, env.KASPA_EFFECTIVE_ADDRESS_PREFIXES);

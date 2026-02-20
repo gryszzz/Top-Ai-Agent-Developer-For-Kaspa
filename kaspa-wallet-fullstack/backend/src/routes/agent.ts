@@ -6,6 +6,7 @@ import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
 import { HttpError } from "../middleware/errorHandler";
 import { trackBusinessEvent } from "../analytics/events";
+import { createIdempotencyMiddleware } from "../middleware/idempotency";
 import type { WalletAgentRuntimeService } from "../runtime/agentRuntime";
 
 const StartSchema = z.object({
@@ -63,6 +64,8 @@ function assertValidWalletAddress(address: string): void {
 
 export function createAgentRouter(agentRuntime: WalletAgentRuntimeService): Router {
   const router = Router();
+  const idempotentAgentStart = createIdempotencyMiddleware("agent_start");
+  const idempotentAgentStop = createIdempotencyMiddleware("agent_stop");
 
   router.get("/state/:address", async (req, res, next) => {
     try {
@@ -82,7 +85,7 @@ export function createAgentRouter(agentRuntime: WalletAgentRuntimeService): Rout
     }
   });
 
-  router.post("/start", async (req, res, next) => {
+  router.post("/start", idempotentAgentStart, async (req, res, next) => {
     try {
       const input = StartSchema.parse(req.body);
       assertValidWalletAddress(input.address);
@@ -111,7 +114,7 @@ export function createAgentRouter(agentRuntime: WalletAgentRuntimeService): Rout
     }
   });
 
-  router.post("/stop", async (req, res, next) => {
+  router.post("/stop", idempotentAgentStop, async (req, res, next) => {
     try {
       const input = StopSchema.parse(req.body);
       assertValidWalletAddress(input.address);
