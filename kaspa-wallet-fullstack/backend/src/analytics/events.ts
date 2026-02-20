@@ -9,11 +9,24 @@ const businessEventsTotal = new Counter({
   registers: [metricsRegistry]
 });
 
-export type BusinessEventName = "signup_started" | "activation_completed" | "payment_intent_created";
+export type BusinessEventName =
+  | "signup_started"
+  | "activation_completed"
+  | "payment_intent_created"
+  | "agent_started"
+  | "agent_stopped";
 
 export function trackBusinessEvent(
   eventName: BusinessEventName,
-  walletType: "kasware" | "kaspium" | "unknown",
+  walletType:
+    | "kasware"
+    | "kastle"
+    | "kaspium"
+    | "kng_web"
+    | "kng_mobile"
+    | "ledger_kasvault"
+    | "cli_wallet"
+    | "unknown",
   metadata?: Record<string, unknown>
 ): void {
   businessEventsTotal.inc({ event_name: eventName, wallet_type: walletType });

@@ -10,7 +10,10 @@ const PaymentQuoteInputSchema = z.object({
   fromAddress: z.string().trim().min(1),
   toAddress: z.string().trim().min(1),
   amountKas: z.string().trim().min(1),
-  walletType: z.enum(["kasware", "kaspium"]).optional().default("kaspium"),
+  walletType: z
+    .enum(["kasware", "kastle", "kaspium", "kng_web", "kng_mobile", "ledger_kasvault", "cli_wallet"])
+    .optional()
+    .default("kaspium"),
   note: z.string().trim().max(120).optional()
 });
 
@@ -31,12 +34,12 @@ export function createPaymentsRouter(): Router {
   router.post("/quote", (req, res, next) => {
     try {
       const input = PaymentQuoteInputSchema.parse(req.body);
-      const fromValidation = validateKaspaAddress(input.fromAddress, env.KASPA_ALLOWED_ADDRESS_PREFIXES);
+      const fromValidation = validateKaspaAddress(input.fromAddress, env.KASPA_EFFECTIVE_ADDRESS_PREFIXES);
       if (!fromValidation.valid) {
         throw new HttpError(400, "Invalid sender address", { reason: fromValidation.reason });
       }
 
-      const toValidation = validateKaspaAddress(input.toAddress, env.KASPA_ALLOWED_ADDRESS_PREFIXES);
+      const toValidation = validateKaspaAddress(input.toAddress, env.KASPA_EFFECTIVE_ADDRESS_PREFIXES);
       if (!toValidation.valid) {
         throw new HttpError(400, "Invalid destination address", { reason: toValidation.reason });
       }

@@ -1,0 +1,9 @@
+{
+  "name": "kaspa-wallet-fullstack",
+  "private": true,
+  "version": "1.4.0",
+  "scripts": {
+    "ci": "npm --prefix backend run build && npm --prefix backend run lint && npm --prefix backend test && npm --prefix frontend run build && npm --prefix frontend test"
+  }
+}
+

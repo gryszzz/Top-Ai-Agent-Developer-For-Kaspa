@@ -17,7 +17,7 @@ export function createBalanceRouter(kaspaClient: KaspaRpcClient): Router {
     try {
       const { address } = ParamsSchema.parse(req.params);
 
-      const validation = validateKaspaAddress(address, env.KASPA_ALLOWED_ADDRESS_PREFIXES);
+      const validation = validateKaspaAddress(address, env.KASPA_EFFECTIVE_ADDRESS_PREFIXES);
       if (!validation.valid) {
         throw new HttpError(400, "Invalid Kaspa address", { reason: validation.reason });
       }
@@ -29,7 +29,7 @@ export function createBalanceRouter(kaspaClient: KaspaRpcClient): Router {
         network: env.KASPA_NETWORK,
         balanceSompi: balanceSompi.toString(),
         balanceKas: sompiToKasString(balanceSompi),
-        networkPrefixesAllowed: env.KASPA_ALLOWED_ADDRESS_PREFIXES,
+        networkPrefixesAllowed: env.KASPA_EFFECTIVE_ADDRESS_PREFIXES,
         timestamp: new Date().toISOString()
       });
     } catch (error) {

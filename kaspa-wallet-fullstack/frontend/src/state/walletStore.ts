@@ -20,6 +20,7 @@ type WalletState = {
     sessionToken?: string;
     verificationMode?: string;
   }) => void;
+  resetConnection: () => void;
   setBalance: (balanceKas: string) => void;
   setError: (error: string) => void;
 };
@@ -37,6 +38,16 @@ export const useWalletStore = create<WalletState>((set) => ({
       sessionToken,
       verificationMode,
       status: "connected",
+      error: undefined
+    }),
+  resetConnection: () =>
+    set({
+      address: "",
+      publicKey: undefined,
+      sessionToken: undefined,
+      verificationMode: undefined,
+      balanceKas: undefined,
+      status: "idle",
       error: undefined
     }),
   setBalance: (balanceKas) => set({ balanceKas }),

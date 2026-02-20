@@ -36,9 +36,15 @@ jobs:
           rm -rf /tmp/pages-artifact
           mkdir -p /tmp/pages-artifact
           cp -R docs/. /tmp/pages-artifact/
-          if [ -n "${{ vars.GH_PAGES_CNAME }}" ]; then
-            echo "${{ vars.GH_PAGES_CNAME }}" > /tmp/pages-artifact/CNAME
+          DOMAIN="${{ vars.GH_PAGES_CNAME }}"
+          if [ -z "$DOMAIN" ] && [ -f /tmp/pages-artifact/CNAME ]; then
+            DOMAIN="$(tr -d '[:space:]' < /tmp/pages-artifact/CNAME)"
           fi
+          if [ -z "$DOMAIN" ]; then
+            DOMAIN="forge-os.xyz"
+          fi
+          echo "$DOMAIN" > /tmp/pages-artifact/CNAME
+          echo "Using custom domain: $DOMAIN"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

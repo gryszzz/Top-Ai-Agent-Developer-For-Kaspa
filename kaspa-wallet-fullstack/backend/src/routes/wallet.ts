@@ -8,7 +8,14 @@ import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
 import { HttpError } from "../middleware/errorHandler";
 
-type WalletType = "kasware" | "kaspium";
+type WalletType =
+  | "kasware"
+  | "kastle"
+  | "kaspium"
+  | "kng_web"
+  | "kng_mobile"
+  | "ledger_kasvault"
+  | "cli_wallet";
 
 type Challenge = {
   address: string;
@@ -21,7 +28,7 @@ const challenges = new Map<string, Challenge>();
 
 const ChallengeInputSchema = z.object({
   address: z.string().trim().min(1),
-  walletType: z.enum(["kasware", "kaspium"]) 
+  walletType: z.enum(["kasware", "kastle", "kaspium", "kng_web", "kng_mobile", "ledger_kasvault", "cli_wallet"])
 });
 
 const SessionInputSchema = z.object({
@@ -64,7 +71,7 @@ export function createWalletRouter(): Router {
   router.post("/challenge", (req, res, next) => {
     try {
       const input = ChallengeInputSchema.parse(req.body);
-      const validation = validateKaspaAddress(input.address, env.KASPA_ALLOWED_ADDRESS_PREFIXES);
+      const validation = validateKaspaAddress(input.address, env.KASPA_EFFECTIVE_ADDRESS_PREFIXES);
       if (!validation.valid) {
         throw new HttpError(400, "Invalid Kaspa address", { reason: validation.reason });
       }
@@ -112,9 +119,9 @@ export function createWalletRouter(): Router {
       let verified = false;
       let verificationMode: "signature-verified" | "signature-unverified" | "manual" = "manual";
 
-      if (challenge.walletType === "kasware") {
+      if (challenge.walletType === "kasware" || challenge.walletType === "kastle") {
         if (!input.signature) {
-          throw new HttpError(400, "Kasware session requires a signature");
+          throw new HttpError(400, `${challenge.walletType} session requires a signature`);
         }
 
         if (input.publicKey) {

@@ -76,7 +76,7 @@ const EnvSchema = z.object({
   PLATFORM_FEE_MIN_KAS: z.string().default("0.01"),
   PLATFORM_FEE_RECIPIENT: z
     .string()
-    .default("kaspa:qpv7fcvdlz6th4hqjtm9qkkms2dw0raem963x3hm8glu3kjgj7922vy69hv85")
+    .default("kaspatest:qpv7fcvdlz6th4hqjtm9qkkms2dw0raem963x3hm8glu3kjgj7922vy69hv85")
 });
 
 const parsed = EnvSchema.safeParse(process.env);
@@ -89,11 +89,43 @@ if (!parsed.success) {
 
 const envValues = parsed.data;
 
+function expectedPrefixesForNetwork(network: string): string[] {
+  const normalized = network.trim().toLowerCase();
+
+  if (normalized.includes("mainnet")) {
+    return ["kaspa"];
+  }
+
+  if (normalized.includes("testnet")) {
+    return ["kaspatest"];
+  }
+
+  if (normalized.includes("devnet")) {
+    return ["kaspadev"];
+  }
+
+  if (normalized.includes("simnet")) {
+    return ["kaspasim"];
+  }
+
+  return [];
+}
+
+const allowedPrefixes = envValues.KASPA_ALLOWED_ADDRESS_PREFIXES.split(",")
+  .map((prefix) => prefix.trim().toLowerCase())
+  .filter(Boolean);
+
+const expectedPrefixes = expectedPrefixesForNetwork(envValues.KASPA_NETWORK);
+const strictPrefixes =
+  expectedPrefixes.length > 0
+    ? allowedPrefixes.filter((prefix) => expectedPrefixes.includes(prefix))
+    : allowedPrefixes;
+const effectivePrefixes = strictPrefixes.length > 0 ? strictPrefixes : allowedPrefixes;
+
 export const env = {
   ...envValues,
-  KASPA_ALLOWED_ADDRESS_PREFIXES: envValues.KASPA_ALLOWED_ADDRESS_PREFIXES.split(",")
-    .map((prefix) => prefix.trim().toLowerCase())
-    .filter(Boolean),
+  KASPA_ALLOWED_ADDRESS_PREFIXES: allowedPrefixes,
+  KASPA_EFFECTIVE_ADDRESS_PREFIXES: effectivePrefixes,
   KASPA_RPC_CA_CERT_PATH: envValues.KASPA_RPC_CA_CERT_PATH
     ? path.resolve(envValues.KASPA_RPC_CA_CERT_PATH)
     : undefined
@@ -101,7 +133,7 @@ export const env = {
 
 const feeRecipientValidation = validateKaspaAddress(
   env.PLATFORM_FEE_RECIPIENT,
-  env.KASPA_ALLOWED_ADDRESS_PREFIXES
+  env.KASPA_EFFECTIVE_ADDRESS_PREFIXES
 );
 
 if (!feeRecipientValidation.valid) {

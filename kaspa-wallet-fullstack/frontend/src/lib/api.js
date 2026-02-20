@@ -91,3 +91,37 @@ export function createPaymentQuote(payload) {
         body: JSON.stringify(payload)
     });
 }
+export function fetchRealtimeStats() {
+    return jsonRequest("/v1/stats/realtime");
+}
+export function fetchAgentState(address, sessionToken) {
+    return jsonRequest("/v1/agent/state/".concat(encodeURIComponent(address)), {
+        headers: {
+            authorization: "Bearer ".concat(sessionToken)
+        }
+    });
+}
+export function startAgentRuntime(payload) {
+    return jsonRequest("/v1/agent/start", {
+        method: "POST",
+        headers: {
+            authorization: "Bearer ".concat(payload.sessionToken)
+        },
+        body: JSON.stringify({
+            address: payload.address,
+            mode: payload.mode,
+            intervalSeconds: payload.intervalSeconds
+        })
+    });
+}
+export function stopAgentRuntime(payload) {
+    return jsonRequest("/v1/agent/stop", {
+        method: "POST",
+        headers: {
+            authorization: "Bearer ".concat(payload.sessionToken)
+        },
+        body: JSON.stringify({
+            address: payload.address
+        })
+    });
+}

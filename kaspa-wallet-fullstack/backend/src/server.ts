@@ -3,10 +3,12 @@ import { env } from "./config/env";
 import { createApp } from "./app";
 import { KaspaRpcClient } from "./kaspa/kaspaRpcClient";
 import { logger } from "./logging/logger";
+import type { WalletAgentRuntimeService } from "./runtime/agentRuntime";
 
 const kaspaClient = new KaspaRpcClient();
 const app = createApp(kaspaClient);
 const server = http.createServer(app);
+const agentRuntime = app.locals.agentRuntime as WalletAgentRuntimeService | undefined;
 
 server.listen(env.PORT, () => {
   logger.info(
@@ -25,10 +27,16 @@ server.listen(env.PORT, () => {
 function shutdown(signal: NodeJS.Signals): void {
   logger.info({ signal }, "Shutting down server");
 
-  server.close((error) => {
+  server.close(async (error) => {
     if (error) {
       logger.error({ err: error }, "Failed to close HTTP server cleanly");
       process.exit(1);
+    }
+
+    if (agentRuntime) {
+      await agentRuntime.shutdown().catch((runtimeError) => {
+        logger.warn({ err: runtimeError }, "Failed to shutdown agent runtime cleanly");
+      });
     }
 
     kaspaClient.shutdown();
