@@ -25,23 +25,14 @@ import {
   signKastleMessage,
   signKaswareMessage,
   subscribeKaswareEvents,
-  type WalletType,
   waitForKastleProvider,
   waitForKaswareProvider
 } from "./lib/walletAdapters";
+import { walletTypeForSlot, type WalletSlotId } from "./lib/walletSlot";
 import { useWalletStore } from "./state/walletStore";
 
 const ADDRESS_BODY_PATTERN = /^[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+$/i;
 const DEFAULT_ALLOWED_PREFIXES = ["kaspatest", "kaspa"];
-
-type WalletSlotId =
-  | "kasware"
-  | "kastle"
-  | "kaspium"
-  | "kng-web"
-  | "kng-mobile"
-  | "ledger-kasvault"
-  | "cli-wallet";
 
 type WalletSlotConfig = {
   id: WalletSlotId;
@@ -243,14 +234,6 @@ function expectedPrefixesForNetwork(network: string): string[] {
 
 function isAddressBackedSlot(slotId: WalletSlotId): boolean {
   return WALLET_SLOT_BY_ID[slotId].connectMode === "address";
-}
-
-function walletTypeForSlot(slotId: WalletSlotId): WalletType {
-  if (slotId === "kasware" || slotId === "kastle") {
-    return slotId;
-  }
-
-  return "kaspium";
 }
 
 export default function App() {

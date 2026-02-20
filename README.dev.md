@@ -18,7 +18,7 @@ Primary runnable app for fullstack wallet work:
 
 ```bash
 cd kaspa-wallet-fullstack/backend && npm ci && npm run build && npm run lint && npm test
-cd kaspa-wallet-fullstack/frontend && npm ci && npm run build && npm test
+cd kaspa-wallet-fullstack/frontend && npm ci && npm run build && npm run lint && npm test
 ```
 
 ## Monetization Guardrail

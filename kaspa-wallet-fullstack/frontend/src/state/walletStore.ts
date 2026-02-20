@@ -51,5 +51,9 @@ export const useWalletStore = create<WalletState>((set) => ({
       error: undefined
     }),
   setBalance: (balanceKas) => set({ balanceKas }),
-  setError: (error) => set({ error, status: "error" })
+  setError: (error) =>
+    set((state) => ({
+      error,
+      status: state.status === "connected" ? "connected" : "error"
+    }))
 }));

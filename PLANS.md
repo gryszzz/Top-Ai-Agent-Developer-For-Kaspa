@@ -50,7 +50,7 @@ Deliver a production-ready Kaspa wallet fullstack where users can connect via Ka
 
 ## Commands to Verify
 - `cd kaspa-wallet-fullstack/backend && npm ci && npm run build && npm run lint && npm test`
-- `cd kaspa-wallet-fullstack/frontend && npm ci && npm run build && npm test`
+- `cd kaspa-wallet-fullstack/frontend && npm ci && npm run build && npm run lint && npm test`
 - `cd kaspa-wallet-fullstack && docker compose config`
 - Happy path API run:
   - `cd kaspa-wallet-fullstack/backend && npm run build && node dist/server.js`

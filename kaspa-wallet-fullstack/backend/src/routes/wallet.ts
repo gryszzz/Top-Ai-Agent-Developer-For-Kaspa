@@ -2,10 +2,12 @@ import crypto from "node:crypto";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import { verifyAsync } from "@noble/secp256k1";
+import Redis from "ioredis";
 import { z } from "zod";
 import { trackBusinessEvent } from "../analytics/events";
 import { env } from "../config/env";
 import { validateKaspaAddress } from "../kaspa/address";
+import { logger } from "../logging/logger";
 import { HttpError } from "../middleware/errorHandler";
 import { createIdempotencyMiddleware } from "../middleware/idempotency";
 
@@ -25,8 +27,120 @@ type Challenge = {
   message: string;
 };
 
-const challenges = new Map<string, Challenge>();
 const idempotentWalletSession = createIdempotencyMiddleware("wallet_session");
+
+interface ChallengeStore {
+  save(nonce: string, challenge: Challenge): Promise<void>;
+  consume(nonce: string): Promise<Challenge | null>;
+}
+
+class InMemoryChallengeStore implements ChallengeStore {
+  private readonly challenges = new Map<string, Challenge>();
+
+  private readonly cleanupTimer: NodeJS.Timeout;
+
+  constructor() {
+    this.cleanupTimer = setInterval(() => {
+      const now = Date.now();
+      for (const [nonce, challenge] of this.challenges.entries()) {
+        if (challenge.expiresAt <= now) {
+          this.challenges.delete(nonce);
+        }
+      }
+    }, 30_000);
+
+    this.cleanupTimer.unref();
+  }
+
+  async save(nonce: string, challenge: Challenge): Promise<void> {
+    this.challenges.set(nonce, challenge);
+  }
+
+  async consume(nonce: string): Promise<Challenge | null> {
+    const challenge = this.challenges.get(nonce) ?? null;
+    if (challenge) {
+      this.challenges.delete(nonce);
+    }
+    return challenge;
+  }
+}
+
+class RedisChallengeStore implements ChallengeStore {
+  private readonly fallback = new InMemoryChallengeStore();
+
+  constructor(private readonly redis: Redis) {}
+
+  async save(nonce: string, challenge: Challenge): Promise<void> {
+    await this.fallback.save(nonce, challenge);
+
+    try {
+      const ttlSeconds = Math.max(30, Math.ceil((challenge.expiresAt - Date.now()) / 1000));
+      await this.redis.set(this.keyForNonce(nonce), JSON.stringify(challenge), "EX", ttlSeconds);
+    } catch (error) {
+      logger.warn(
+        { err: error },
+        "Redis wallet challenge store write failed; challenge is only available on local instance"
+      );
+    }
+  }
+
+  async consume(nonce: string): Promise<Challenge | null> {
+    try {
+      const result = await this.redis.call("GETDEL", this.keyForNonce(nonce));
+      if (typeof result === "string" && result.length > 0) {
+        return this.parseChallenge(result);
+      }
+    } catch (error) {
+      logger.warn(
+        { err: error },
+        "Redis wallet challenge consume failed; falling back to local in-memory challenge store"
+      );
+    }
+
+    return this.fallback.consume(nonce);
+  }
+
+  private keyForNonce(nonce: string): string {
+    return `forgeos:wallet:challenge:${env.KASPA_NETWORK}:${nonce}`;
+  }
+
+  private parseChallenge(raw: string): Challenge | null {
+    try {
+      const parsed = JSON.parse(raw) as Challenge;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+}
+
+let challengeStoreSingleton: ChallengeStore | null = null;
+
+function getChallengeStore(): ChallengeStore {
+  if (challengeStoreSingleton) {
+    return challengeStoreSingleton;
+  }
+
+  if (!env.REDIS_URL) {
+    challengeStoreSingleton = new InMemoryChallengeStore();
+    return challengeStoreSingleton;
+  }
+
+  const redis = new Redis(env.REDIS_URL, {
+    maxRetriesPerRequest: 2,
+    enableReadyCheck: true,
+    lazyConnect: true
+  });
+  redis.connect().catch((error) => {
+    logger.warn({ err: error }, "Redis wallet challenge store failed to connect; using local fallback behavior");
+  });
+  redis.on("error", (error) => {
+    logger.warn({ err: error }, "Redis wallet challenge store error");
+  });
+
+  challengeStoreSingleton = new RedisChallengeStore(redis);
+  return challengeStoreSingleton;
+}
 
 const ChallengeInputSchema = z.object({
   address: z.string().trim().min(1),
@@ -68,19 +182,11 @@ async function verifyMessageSignature(
   }
 }
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [nonce, challenge] of challenges.entries()) {
-    if (challenge.expiresAt <= now) {
-      challenges.delete(nonce);
-    }
-  }
-}, 30_000).unref();
-
 export function createWalletRouter(): Router {
   const router = Router();
+  const challengeStore = getChallengeStore();
 
-  router.post("/challenge", (req, res, next) => {
+  router.post("/challenge", async (req, res, next) => {
     try {
       const input = ChallengeInputSchema.parse(req.body);
       const validation = validateKaspaAddress(input.address, env.KASPA_EFFECTIVE_ADDRESS_PREFIXES);
@@ -92,7 +198,7 @@ export function createWalletRouter(): Router {
       const expiresAt = Date.now() + env.CHALLENGE_TTL_SECONDS * 1000;
       const message = `Kaspa wallet auth\naddress:${input.address}\nnonce:${nonce}\nnetwork:${env.KASPA_NETWORK}`;
 
-      challenges.set(nonce, {
+      await challengeStore.save(nonce, {
         address: input.address,
         walletType: input.walletType,
         expiresAt,
@@ -116,13 +222,11 @@ export function createWalletRouter(): Router {
   router.post("/session", idempotentWalletSession, async (req, res, next) => {
     try {
       const input = SessionInputSchema.parse(req.body);
-      const challenge = challenges.get(input.nonce);
+      const challenge = await challengeStore.consume(input.nonce);
 
       if (!challenge) {
         throw new HttpError(400, "Unknown or expired nonce");
       }
-
-      challenges.delete(input.nonce);
 
       if (challenge.expiresAt <= Date.now()) {
         throw new HttpError(400, "Nonce expired");
