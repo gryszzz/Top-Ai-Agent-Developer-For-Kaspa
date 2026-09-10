@@ -1,7 +1,7 @@
 # Kaspa Live Source Intelligence
 
-Checked: 2026-07-01T15:29:30.815Z
-Facts hash: `5087a6525acc46b49891e42e6075195f13e95e2e3796ad0878caa0fbbdc19547`
+Checked: 2026-09-10T16:41:29.685Z
+Facts hash: `f03368c40eb497d58d52fc96044c4c76a92057bc5d32ab45ceff30d737b52fd0`
 Source health: **healthy_with_warnings**
 
 ## Primary Evidence
@@ -25,21 +25,21 @@ Source health: **healthy_with_warnings**
 
 | Source | Ref | SHA | Status |
 | --- | --- | --- | --- |
-| kaspanet/rusty-kaspa | heads/master | `98a4ccd8d200` | ok |
+| kaspanet/rusty-kaspa | heads/master | `c338d495bec2` | ok |
 | kaspanet/rusty-kaspa | heads/toccata | `0ae28f939e61` | ok |
 | kaspanet/rusty-kaspa | heads/tn10 | `e5f6d1f7c86f` | ok |
 | kaspanet/rusty-kaspa | heads/tn12 | `ab4c51afde90` | ok |
-| kaspanet/kips | heads/master | `1aba3b8321c1` | ok |
-| kaspanet/docs | heads/main | `c3fb0fded5f1` | ok |
-| kaspanet/silverscript | heads/master | `d25bd3427a09` | ok |
-| kaspanet/vprogs | heads/master | `252ff51f5467` | ok |
+| kaspanet/kips | heads/master | `e4ae2332117b` | ok |
+| kaspanet/docs | heads/main | `0ac77d043a80` | ok |
+| kaspanet/silverscript | heads/master | `3ed973335b59` | ok |
+| kaspanet/vprogs | heads/master | `f9b84a863a7c` | ok |
 
 ## Network Identity
 
 | Endpoint | Expected | Observed | DAA | Status |
 | --- | --- | --- | ---: | --- |
-| [Mainnet blockDAG](https://api.kaspa.org/info/blockdag) | kaspa-mainnet | kaspa-mainnet | 474999257 | ok |
-| [TN10 blockDAG](https://api-tn10.kaspa.org/info/blockdag) | kaspa-testnet-10 | kaspa-testnet-10 | 505614276 | ok |
+| [Mainnet blockDAG](https://api.kaspa.org/info/blockdag) | kaspa-mainnet | kaspa-mainnet | 536379334 | ok |
+| [TN10 blockDAG](https://api-tn10.kaspa.org/info/blockdag) | kaspa-testnet-10 | kaspa-testnet-10 | 566997882 | ok |
 | [TN12 blockDAG](https://api-tn12.kaspa.org/info/blockdag) | kaspa-testnet-12 |  |  | failed 503 |
 
 ## KIP Index
@@ -57,10 +57,10 @@ Source health: **healthy_with_warnings**
 | 13 | Active | Transient Storage Handling |
 | 14 | Active | The Crescendo Hardfork |
 | 15 | Active | Canonical Transaction Ordering and SelectedParent Accepted Transactions Commitment |
-| 16 | Proposed, Implemented and activated in TN10 | New Transaction Opcodes for Verifiable Computation |
-| 17 | Implemented and activated in TN10 | Covenants and Improved Scripting Capabilities |
-| 20 | Proposed, Implemented and activated in TN10 | Covenant IDs |
-| 21 | Implemented and activated in TN10 | Partitioned Sequencing Commitment with O(activity) Proving |
+| 16 | Active | New Transaction Opcodes for Verifiable Computation |
+| 17 | Active | Covenants and Improved Scripting Capabilities |
+| 20 | Active | Covenant IDs |
+| 21 | Active | Partitioned Sequencing Commitment with O(activity) Proving |
 
 ## Warnings
 
